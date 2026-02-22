@@ -1,0 +1,40 @@
+#include "player.h"
+
+int MoveLeft_Player0(Input *input) {
+    return input->left && !input->right;
+}
+
+int MoveRight_Player0(Input *input) {
+    return !input->left && input->right;
+}
+
+int MoveLeft_Player1(Input *input) {
+    return input->a && !input->d;
+}
+
+int MoveRight_Player1(Input *input) {
+    return !input->a && input->d;
+}
+
+void Init_CreateGato0(Player *p) {
+    p->sprites_path[0] = "assets/img/gato_maca0.png";
+    p->sprites_path[1] = "assets/img/gato_maca1.png";
+    p->sprites_path[2] = "assets/img/gato_maca2.png";
+    p->w_over_h = 100.0 / 100.0;
+    p->input_mapper.move_left = MoveLeft_Player0;
+    p->input_mapper.move_right = MoveRight_Player0;
+}
+
+void Init_CreateGato1(Player *p) {
+    p->sprites_path[0] = "assets/img/gato_banana0.png";
+    p->sprites_path[1] = "assets/img/gato_banana1.png";
+    p->sprites_path[2] = "assets/img/gato_banana2.png";
+    p->w_over_h = 637.0 / 358.0;
+    p->input_mapper.move_left = MoveLeft_Player1;
+    p->input_mapper.move_right = MoveRight_Player1;
+}
+
+void Init_Players(Player p[]) {
+    Init_CreateGato0(&p[0]);
+    Init_CreateGato1(&p[1]);
+}
