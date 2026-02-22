@@ -1,11 +1,12 @@
 #include "player.h"
+#include "debug.h"
 #include "game.h"
 
 int Player_Load(Player *p, SDL_Renderer *renderer) {
     for (int i = 0; i < NUM_SPRITES; i++) {
         p->sprites[i] = Renderer_LoadImage(renderer, p->sprites_path[i]);
         if (!p->sprites[i]) {
-            printf("Player_Load error: error loading image %s\n", p->sprites_path[i]);
+            Debug_Error("Player_Load error: error loading image %s\n", p->sprites_path[i]);
             return FAILURE;
         }
     }
@@ -39,8 +40,6 @@ void Player_Update(Player *p, Game *game) {
     else {
         int t = game->time % 30;
         p->curr_sprite = (t < 10) ? 0 : (t < 20) ? 1 : 2;
-        printf("game time = %d\n", t);
-        printf("curr_sprite: %d\n", p->curr_sprite);
     }
 
     /* update positions */

@@ -1,17 +1,24 @@
 #include "game.h"
 #include "common.h"
 #include "input.h"
+#include "debug.h"
 
 #include "init.c"
 
 int main() {
+    Debug_StartTimer();
+
     Game game;
 
     /* Loading the game */
     Game_Init(&game);
     Init_Players(game.players);
 
+    Debug_Info("Game initialized successfully!\n");
+
     Game_Load(&game);
+
+    Debug_Info("Game loaded successfully!\n");
 
     /* Game loop */
     int done = FALSE;
@@ -24,8 +31,9 @@ int main() {
 
     /* Cleaning up everything and exiting */
     Game_Clean(&game);
-    SDL_Quit();
+    Debug_Info("Game cleaned successfully!\n");
 
+    SDL_Quit();
     return EXIT_SUCCESS;
 }
 
@@ -34,21 +42,21 @@ void Game_Init(Game *game) {
     game->renderer = NULL;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-        printf("Error initializing SDL: %s\n", SDL_GetError());
+        Debug_Error("Error initializing SDL: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
     game->win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                  WIN_WIDTH, WIN_HEIGHT, 0);
     if (!game->win) {
-        printf("Error creating SDL windows: %s\n", SDL_GetError());
+        Debug_Error("Error creating SDL windows: %s\n", SDL_GetError());
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
 
     game->renderer = SDL_CreateRenderer(game->win, -1, SDL_RENDERER_ACCELERATED);
     if (!game->renderer) {
-        printf("Error creating SDL renderer: %s", SDL_GetError());
+        Debug_Error("Error creating SDL renderer: %s", SDL_GetError());
         SDL_DestroyWindow(game->win);
         SDL_Quit();
         exit(EXIT_FAILURE);
