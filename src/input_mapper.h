@@ -6,6 +6,8 @@
 typedef struct {
     int (*move_left)(Input *input);
     int (*move_right)(Input *input);
+    int (*increase_angle)(Input *input);
+    int (*decrease_angle)(Input *input);
 } InputMapper;
 
 #endif

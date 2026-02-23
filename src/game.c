@@ -89,8 +89,7 @@ int Game_Update(Game *game) {
 }
 
 void Game_Draw(Game *game) {
-    /* blue background */
-                                    /*  red green blue alpha */
+    /* blue background */           /*  red green blue alpha */
     SDL_SetRenderDrawColor(game->renderer, 128, 128, 255, 255);
     /* clear the window */
     SDL_RenderClear(game->renderer);

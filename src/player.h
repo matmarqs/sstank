@@ -7,7 +7,7 @@
 #include "input_mapper.h"
 
 #define SPEED      (300)   /* speed in pixels/sec */
-#define BASE_PLAYER_HEIGHT  (100)
+#define BASE_PLAYER_HEIGHT  (50)
 
 #define NUM_SPRITES (3)
 
@@ -18,6 +18,8 @@ typedef struct {
     float w, h;
     float w_over_h;
     int facing_right;
+
+    float angle;
 
     int curr_sprite;
 

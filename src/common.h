@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <math.h>
+
+#define CONST_PI 3.14159265
+
 #define TRUE  (1)
 #define FALSE (0)
 
