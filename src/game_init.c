@@ -17,6 +17,10 @@ int DecreaseAngle_Player0(Input *input) {
     return !input->up && input->down;
 }
 
+int ThrowBomb_Player0(Input *input) {
+    return input->enter;  // Enter/Return key
+}
+
 int MoveLeft_Player1(Input *input) {
     return input->a && !input->d;
 }
@@ -33,7 +37,12 @@ int DecreaseAngle_Player1(Input *input) {
     return !input->w && input->s;
 }
 
-void Init_CreateGato0(Player *p) {
+int ThrowBomb_Player1(Input *input) {
+    return input->space;  // Space bar
+}
+
+void Init_Player0(Player *p) {
+    p->id = 0;
     p->sprites_path[0] = "assets/img/gato_maca0.png";
     p->sprites_path[1] = "assets/img/gato_maca1.png";
     p->sprites_path[2] = "assets/img/gato_maca2.png";
@@ -46,9 +55,11 @@ void Init_CreateGato0(Player *p) {
     p->input_mapper.move_right = MoveRight_Player0;
     p->input_mapper.increase_angle = IncreaseAngle_Player0;
     p->input_mapper.decrease_angle = DecreaseAngle_Player0;
+    p->input_mapper.throw_projectile = ThrowBomb_Player0;
 }
 
-void Init_CreateGato1(Player *p) {
+void Init_Player1(Player *p) {
+    p->id = 1;
     p->sprites_path[0] = "assets/img/gato_banana0.png";
     p->sprites_path[1] = "assets/img/gato_banana1.png";
     p->sprites_path[2] = "assets/img/gato_banana2.png";
@@ -61,9 +72,10 @@ void Init_CreateGato1(Player *p) {
     p->input_mapper.move_right = MoveRight_Player1;
     p->input_mapper.increase_angle = IncreaseAngle_Player1;
     p->input_mapper.decrease_angle = DecreaseAngle_Player1;
+    p->input_mapper.throw_projectile = ThrowBomb_Player1;
 }
 
 void Init_Players(Player p[]) {
-    Init_CreateGato0(&p[0]);
-    Init_CreateGato1(&p[1]);
+    Init_Player0(&p[0]);
+    Init_Player1(&p[1]);
 }

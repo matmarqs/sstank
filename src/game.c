@@ -3,7 +3,9 @@
 #include "input.h"
 #include "debug.h"
 
-#include "init.c"
+#include "game_init.c"
+#include "projectile.h"
+#include <SDL2/SDL_video.h>
 
 int main() {
     Debug_StartTimer();
@@ -14,11 +16,11 @@ int main() {
     Game_Init(&game);
     Init_Players(game.players);
 
-    Debug_Info("Game initialized successfully!\n");
+    Debug_Info("Game initialized successfully!");
 
     Game_Load(&game);
 
-    Debug_Info("Game loaded successfully!\n");
+    Debug_Info("Game loaded successfully!");
 
     /* Game loop */
     int done = FALSE;
@@ -31,36 +33,43 @@ int main() {
 
     /* Cleaning up everything and exiting */
     Game_Clean(&game);
-    Debug_Info("Game cleaned successfully!\n");
+    Debug_Info("Game cleaned successfully!");
 
     SDL_Quit();
     return EXIT_SUCCESS;
 }
 
 void Game_Init(Game *game) {
-    game->win = NULL;
+    game->window = NULL;
     game->renderer = NULL;
 
+    game->w = WORLD_WIDTH;
+    game->h = WORLD_HEIGHT;
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-        Debug_Error("Error initializing SDL: %s\n", SDL_GetError());
+        Debug_Error("Error initializing SDL: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
-    game->win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                 WIN_WIDTH, WIN_HEIGHT, 0);
-    if (!game->win) {
-        Debug_Error("Error creating SDL windows: %s\n", SDL_GetError());
+    game->window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                 game->w, game->h, SDL_WINDOW_RESIZABLE);
+    if (!game->window) {
+        Debug_Error("Error creating SDL windows: %s", SDL_GetError());
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
 
-    game->renderer = SDL_CreateRenderer(game->win, -1, SDL_RENDERER_ACCELERATED);
+    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
     if (!game->renderer) {
         Debug_Error("Error creating SDL renderer: %s", SDL_GetError());
-        SDL_DestroyWindow(game->win);
+        SDL_DestroyWindow(game->window);
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
+
+    int w, h;
+    SDL_GetWindowSize(game->window, &w, &h);
+    //Camera_Init(&game->camera, w, h);
 }
 
 void Game_Load(Game *game) {
@@ -74,23 +83,33 @@ void Game_Load(Game *game) {
             Game_Clean(game);
         }
     }
+
+    int status = Projectile_Load(&game->projectile_sys, game->renderer);
+    if (status == FAILURE) {
+        Game_Clean(game);
+    }
 }
 
 int Game_Update(Game *game) {
     game->time++;
 
-    int done = Input_SetEvents(&game->event, &game->input);
+    int done = Input_SetEvents(&game->event, &game->input, &game->camera, game->window);
 
     for (int i = 0; i < 2; i++) {
         Player_Update(&game->players[i], game);
     }
 
+    Projectile_Update(&game->projectile_sys, game);
+
     return done;
 }
 
 void Game_Draw(Game *game) {
+    // Set the viewport - SDL does the scaling automatically!
+    //SDL_RenderSetViewport(game->renderer, &game->camera.viewport);
+
     /* blue background */           /*  red green blue alpha */
-    SDL_SetRenderDrawColor(game->renderer, 128, 128, 255, 255);
+    SDL_SetRenderDrawColor(game->renderer, 128, 128, 255, 100);
     /* clear the window */
     SDL_RenderClear(game->renderer);
 
@@ -98,6 +117,8 @@ void Game_Draw(Game *game) {
     for (int i = 0; i < 2; i++) {
         Player_Draw(&game->players[i], game->renderer);
     }
+
+    Projectile_Draw(&game->projectile_sys, game->renderer);
 
     SDL_RenderPresent(game->renderer);
 }
@@ -107,5 +128,5 @@ void Game_Clean(Game *game) {
         Player_Clean(&game->players[i]);
     }
     if (game->renderer) SDL_DestroyRenderer(game->renderer);
-    if (game->win) SDL_DestroyWindow(game->win);
+    if (game->window) SDL_DestroyWindow(game->window);
 }

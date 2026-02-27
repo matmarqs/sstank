@@ -3,7 +3,9 @@
 
 #include "common.h"
 #include "player.h"
+#include "camera.h"
 #include "input.h"
+#include "projectile.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
@@ -12,15 +14,15 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
 #include <stdlib.h>
-
-#define WIN_WIDTH  (1200)
-#define WIN_HEIGHT (900)
 
 #define GAME_TITLE  "Projectile Game"
 
+#define GRAVITY 1000.0f
+
 struct Game {
-    SDL_Window *win;
+    SDL_Window *window;
     SDL_Renderer *renderer;
 
     SDL_Event event;
@@ -29,6 +31,12 @@ struct Game {
 
     Player players[2];
 
+    ProjectileSystem projectile_sys;
+
+    Camera camera;
+
+    int w, h;
+
     int time;
 };
 
@@ -36,7 +44,7 @@ void Game_Init(Game *game);
 SDL_Texture *Game_LoadImage(Game *game, char *img_path);
 void Game_Load(Game *game);
 int Game_Update(Game *game);
-void Game_Draw (Game *game);
+void Game_Draw(Game *game);
 void Game_Clean(Game *game);
 
 #endif

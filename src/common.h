@@ -11,8 +11,8 @@
 #define SUCCESS (1)
 #define FAILURE (0)
 
-#define WIN_WIDTH  (1200)
-#define WIN_HEIGHT (900)
+#define WORLD_WIDTH  (1200)
+#define WORLD_HEIGHT (900)
 
 #define GAME_TITLE  "Projectile Game"
 

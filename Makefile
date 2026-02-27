@@ -1,11 +1,11 @@
 # Flexible auto-discovery Makefile
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -g $(shell pkg-config --cflags sdl2 SDL2_image)
-LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_image) -lm
+CFLAGS = -Wall -Wextra -std=c99 -g $(shell pkg-config --cflags sdl2 SDL2_image SDL2_gfx)
+LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_image SDL2_gfx) -lm
 TARGET = game.elf
 
 # Find ALL .c files recursively in src/ (if you add subdirectories later)
-SOURCES = $(shell find src -name "*.c" -not -name "init.c")
+SOURCES = $(shell find src -name "*.c" -not -name "game_init.c")
 OBJECTS = $(SOURCES:.c=.o)
 
 $(TARGET): $(OBJECTS)

@@ -1,11 +1,12 @@
 #include "input.h"
+#include <SDL2/SDL_events.h>
 
 void Input_InitKeys(Input *input) {
     input->up = input->left = input->down = input->right = input->enter = FALSE;
     input->w = input->a = input->s = input->d = input->space = FALSE;
 }
 
-int Input_SetEvents(SDL_Event *ev, Input *input) {
+int Input_SetEvents(SDL_Event *ev, Input *input, Camera *camera, SDL_Window *window) {
     int done = FALSE;
 
     while (SDL_PollEvent(ev)) {
@@ -15,6 +16,10 @@ int Input_SetEvents(SDL_Event *ev, Input *input) {
                 break;
 
             case SDL_KEYDOWN:
+                //if (ev->key.keysym.sym == SDLK_F11) {
+                //    // Press F for fullscreen
+                //    Camera_ToggleFullscreen(camera, window);
+                //}
                 switch(ev->key.keysym.scancode) {
                     case KEY_UP:    input->up = TRUE; break;
                     case KEY_LEFT:  input->left = TRUE; break;
@@ -45,6 +50,13 @@ int Input_SetEvents(SDL_Event *ev, Input *input) {
                     default: break;
                 }
                 break;
+
+            //case SDL_WINDOWEVENT:
+            //    if (ev->window.event == SDL_WINDOWEVENT_RESIZED) {
+            //        // Window resized (including fullscreen toggle)
+            //        Camera_Init(camera, ev->window.data1, ev->window.data2);
+            //    }
+            //    break;
 
             default:
                 break;

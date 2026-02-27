@@ -149,8 +149,8 @@ void Debug_StartTimer(void) {
     // Unix implementation
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    static double last_time = 0;
-    last_time = tv.tv_sec + tv.tv_usec / 1000000.0;
+    //static double last_time = 0;
+    //last_time = tv.tv_sec + tv.tv_usec / 1000000.0;
 #endif
 }
 

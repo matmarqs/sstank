@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include <SDL2/SDL_events.h>
+#include "camera.h"
 
 #define KEY_UP    (SDL_SCANCODE_UP)
 #define KEY_LEFT  (SDL_SCANCODE_LEFT)
@@ -21,7 +22,7 @@ typedef struct {
     int up, left, down, right, enter;
 } Input;
 
-int Input_SetEvents(SDL_Event *ev_ptr, Input *input);
+int Input_SetEvents(SDL_Event *ev_ptr, Input *input, Camera *camera, SDL_Window *window);
 void Input_InitKeys(Input *input);
 
 #endif

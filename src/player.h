@@ -12,18 +12,23 @@
 #define NUM_SPRITES (3)
 
 typedef struct {
+    int id;
+
     float x, y;
-    float vx;
+    float vx, vy;
 
     float w, h;
     float w_over_h;
     int facing_right;
 
     float angle;
+    float angle_render;
 
     int curr_sprite;
 
     InputMapper input_mapper;
+
+    int projectile_timer;
 
     char *sprites_path[3];
     SDL_Texture *sprites[NUM_SPRITES];
