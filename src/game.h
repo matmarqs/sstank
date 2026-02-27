@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "player.h"
-#include "camera.h"
 #include "input.h"
 #include "projectile.h"
 
@@ -32,8 +31,6 @@ struct Game {
     Player players[2];
 
     ProjectileSystem projectile_sys;
-
-    Camera camera;
 
     int w, h;
 

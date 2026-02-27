@@ -5,6 +5,7 @@
 
 #include "game_init.c"
 #include "projectile.h"
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
 int main() {
@@ -67,9 +68,7 @@ void Game_Init(Game *game) {
         exit(EXIT_FAILURE);
     }
 
-    int w, h;
-    SDL_GetWindowSize(game->window, &w, &h);
-    //Camera_Init(&game->camera, w, h);
+    SDL_RenderSetLogicalSize(game->renderer, game->w, game->h); // automatic resizes to any resolution
 }
 
 void Game_Load(Game *game) {
@@ -93,7 +92,7 @@ void Game_Load(Game *game) {
 int Game_Update(Game *game) {
     game->time++;
 
-    int done = Input_SetEvents(&game->event, &game->input, &game->camera, game->window);
+    int done = Input_SetEvents(&game->event, &game->input);
 
     for (int i = 0; i < 2; i++) {
         Player_Update(&game->players[i], game);
