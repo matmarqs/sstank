@@ -36,7 +36,7 @@ typedef struct {
 
 int  Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer);
 void Projectile_Update(ProjectileSystem *ps, Game *game);
-void Projectile_Draw(ProjectileSystem *ps, SDL_Renderer *renderer);
+void Projectile_Render(ProjectileSystem *ps, SDL_Renderer *renderer);
 void Projectile_Clean(ProjectileSystem *ps);
 
 void Projectile_Throw(ProjectileSystem *ps, float x, float y, float angle, float power, int owner);

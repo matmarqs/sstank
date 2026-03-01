@@ -17,10 +17,6 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <stdlib.h>
 
-#define GAME_TITLE  "Projectile Game"
-
-#define GRAVITY 1000.0f
-
 struct Game {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -44,7 +40,7 @@ void Game_Init(Game *game);
 SDL_Texture *Game_LoadImage(Game *game, char *img_path);
 void Game_Load(Game *game);
 int Game_Update(Game *game);
-void Game_Draw(Game *game);
+void Game_Render(Game *game);
 void Game_Clean(Game *game);
 
 #endif

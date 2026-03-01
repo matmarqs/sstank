@@ -32,7 +32,7 @@ int main() {
     int done = FALSE;
     while (!done) {
         done = Game_Update(&game);
-        Game_Draw(&game);
+        Game_Render(&game);
         /* wait 1/60 seconds (assuming our calculations take ZERO time) */
         SDL_Delay(1000/60);     /* the unit of this is milliseconds */
     }
@@ -108,9 +108,9 @@ int Game_Update(Game *game) {
     return done;
 }
 
-void Game_Draw(Game *game) {
-    ///* blue background */           /*  red green blue alpha */
-    //SDL_SetRenderDrawColor(game->renderer, 128, 128, 255, 100);
+void Game_Render(Game *game) {
+    /* black background */           /*  red green blue alpha */
+    SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
     /* clear the window */
     SDL_RenderClear(game->renderer);
 
@@ -118,10 +118,10 @@ void Game_Draw(Game *game) {
 
     /* draw the image to the window */
     for (int i = 0; i < 2; i++) {
-        Player_Draw(&game->players[i], game->renderer);
+        Player_Render(&game->players[i], game->renderer);
     }
 
-    Projectile_Draw(&game->projectile_sys, game->renderer);
+    Projectile_Render(&game->projectile_sys, game->renderer);
 
     SDL_RenderPresent(game->renderer);
 }

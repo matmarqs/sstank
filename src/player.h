@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include <SDL2/SDL.h>
-#include "renderer.h"
 #include "input_mapper.h"
 
 #define SPEED      (300)   /* speed in pixels/sec */
@@ -17,8 +16,12 @@ typedef struct {
     float x, y;
     float vx, vy;
 
+    int on_ground;
+
     float w, h;
     float w_over_h;
+    float w_render, h_render;
+
     int facing_right;
 
     float angle;
@@ -36,7 +39,11 @@ typedef struct {
 
 int Player_Load(Player *p, SDL_Renderer *renderer);
 void Player_Update(Player *p, Game *game);
-void Player_Draw(Player *p, SDL_Renderer *renderer);
+void Player_Render(Player *p, SDL_Renderer *renderer);
 void Player_Clean(Player *p);
+
+void Player_ShootingHandler(Player *p, Game *game);
+void Player_MovementHandler(Player *p, Game *game);
+void Player_AnimationHandler(Player *p, Game *game);
 
 #endif

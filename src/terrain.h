@@ -44,6 +44,12 @@ void Terrain_DestroyCircle(Terrain *terr, float cx, float cy, float radius);
 void Terrain_DestroyRect(Terrain *terr, float x, float y, float w, float h);
 // Query functions
 int Terrain_IsSolid(Terrain *terr, int x, int y);
-int Terrain_CheckCollision(Terrain *terr, float x, float y, float w, float h, float *hit_x, float *hit_y);
+int Terrain_CheckCollision(Terrain *terr, float x, float y, float w, float h);
+
+float Terrain_FindGroundY(Terrain *terr, float center_x, float current_y);
+float GetGroundY(Terrain *terr, float x);
+
+float GetGroundYBelow(Terrain *terr, float x, float start_y);
+int IsGroundedAt(Terrain *terr, float x, float y, float height);
 
 #endif

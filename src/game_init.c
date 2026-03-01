@@ -49,8 +49,6 @@ void Init_Player0(Player *p) {
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
     }
-
-    p->w_over_h = 100.0 / 100.0;
     p->input_mapper.move_left = MoveLeft_Player0;
     p->input_mapper.move_right = MoveRight_Player0;
     p->input_mapper.increase_angle = IncreaseAngle_Player0;
@@ -66,8 +64,6 @@ void Init_Player1(Player *p) {
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
     }
-
-    p->w_over_h = 637.0 / 358.0;
     p->input_mapper.move_left = MoveLeft_Player1;
     p->input_mapper.move_right = MoveRight_Player1;
     p->input_mapper.increase_angle = IncreaseAngle_Player1;

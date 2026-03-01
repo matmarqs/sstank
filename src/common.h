@@ -18,6 +18,7 @@
 #define WORLD_HEIGHT (1800)
 
 #define GAME_TITLE  "Projectile Game"
+#define GRAVITY 1000.0f
 
 typedef struct Game Game;
 

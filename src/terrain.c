@@ -1,7 +1,5 @@
 #include "terrain.h"
 #include "debug.h"
-#include "renderer.h"
-#include <math.h>
 #include <string.h>
 
 static inline int mask_index(int width, int x, int y) {
@@ -210,7 +208,7 @@ void Terrain_DestroyCircle(Terrain *terr, float cx, float cy, float radius) {
 
     if (pixels_destroyed > 0) {
         terr->dirty = 1;
-        Debug_Info("Destroyed %d pixels at (%d,%d) radius %d",
+        Debug_Info("Destroyed %d pixels at (%.2f,%.2f) radius %.2f",
                   pixels_destroyed, cx, cy, radius);
     }
 }
@@ -245,7 +243,7 @@ int Terrain_IsSolid(Terrain *terr, int x, int y) {
     return !terr->destruction_mask[mask_index(terr->width, x, y)];
 }
 
-int Terrain_CheckCollision(Terrain *terr, float x, float y, float w, float h, float *hit_x, float *hit_y) {
+int Terrain_CheckCollision(Terrain *terr, float x, float y, float w, float h) {
     int min_x = MAX(0, (int)x);
     int max_x = MIN(terr->width - 1, (int)(x + w));
     int min_y = MAX(0, (int)y);
@@ -254,12 +252,60 @@ int Terrain_CheckCollision(Terrain *terr, float x, float y, float w, float h, fl
     for (int ty = min_y; ty <= max_y; ty++) {
         for (int tx = min_x; tx <= max_x; tx++) {
             if (Terrain_IsSolid(terr, tx, ty)) {
-                *hit_x = tx;
-                *hit_y = ty;
                 return 1;  // Collision!
             }
         }
     }
 
     return 0;
+}
+
+// Helper function to find ground Y coordinate
+float Terrain_FindGroundY(Terrain *terr, float center_x, float current_y) {
+    // Start from current position and scan downward
+    for (int y = current_y + 1; y < terr->height; y++) {
+        if (Terrain_IsSolid(terr, center_x, y)) {
+            return y;  // Found ground
+        }
+    }
+    return terr->height;  // No ground found (bottom of world)
+}
+
+// Helper: Get ground Y at given X coordinate
+float GetGroundY(Terrain *terr, float x) {
+    int ix = x;
+    if (ix < 0 || ix >= terr->width) return terr->height;
+
+    // Scan from top to find first solid pixel
+    for (int y = 0; y < terr->height; y++) {
+        if (Terrain_IsSolid(terr, ix, y)) {
+            return y;
+        }
+    }
+    return terr->height;  // No ground found
+}
+
+// Helper: Get ground Y at given X coordinate, starting from player's feet
+float GetGroundYBelow(Terrain *terr, float x, float start_y) {
+    int ix = x;
+    if (ix < 0 || ix >= terr->width) return terr->height;
+
+    // Scan from player's feet DOWNWARD only
+    for (int y = start_y; y < terr->height; y++) {
+        if (Terrain_IsSolid(terr, ix, y)) {
+            return y;  // Found ground below
+        }
+    }
+    return terr->height;  // No ground found below
+}
+
+// Also need function to check if there's ground directly beneath
+int IsGroundedAt(Terrain *terr, float x, float y, float height) {
+    int ix = x;
+    int feet_y = y + height;
+
+    if (ix < 0 || ix >= terr->width) return 0;
+    if (feet_y >= terr->height) return 0;
+
+    return Terrain_IsSolid(terr, ix, feet_y);
 }

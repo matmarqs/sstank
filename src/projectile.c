@@ -2,13 +2,13 @@
 #include "common.h"
 #include "game.h"
 #include "debug.h"
-#include "renderer.h"
 #include "terrain.h"
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
 #include <math.h>
 
 int Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer) {
-    ps->sprites[0] = Renderer_LoadImage(renderer, "assets/img/toppng.com-bombs-1668x1686.png");
+    ps->sprites[0] = IMG_LoadTexture(renderer, "assets/img/toppng.com-bombs-1668x1686.png");
     if (!ps->sprites[0]) {
         Debug_Error("Bomb sprite not found");
         return FAILURE;
@@ -77,9 +77,8 @@ void Projectile_Update(ProjectileSystem *ps, Game *game) {
         }
 
         // Collision
-        float hit_x, hit_y;
         if (p->x < 0 || p->x > game->w || p->y < 0 || p->y > game->h
-            || Terrain_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h, &hit_x, &hit_y)) {
+            || Terrain_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h)) {
             p->state = PROJECTILE_EXPLODING;
             p->explosion_timer = 10;
             Terrain_DestroyCircle(&game->terrain, p->x + p->w/2.0, p->y + p->h/2.0, BOMB_RADIUS);
@@ -88,7 +87,7 @@ void Projectile_Update(ProjectileSystem *ps, Game *game) {
     }
 }
 
-void Projectile_Draw(ProjectileSystem *ps, SDL_Renderer *renderer) {
+void Projectile_Render(ProjectileSystem *ps, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->projectiles[i];
 
