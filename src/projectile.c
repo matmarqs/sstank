@@ -3,6 +3,7 @@
 #include "game.h"
 #include "debug.h"
 #include "renderer.h"
+#include "terrain.h"
 #include <SDL2/SDL_render.h>
 #include <math.h>
 
@@ -33,8 +34,8 @@ void Projectile_Throw(ProjectileSystem *ps, float x, float y, float angle, float
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         if (ps->projectiles[i].state == PROJECTILE_INACTIVE) {
             float speed = power * 5.0f;
-            ps->projectiles[i].x = x;
-            ps->projectiles[i].y = y;
+            ps->projectiles[i].x = x - PROJECTILE_WIDTH / 2.0;
+            ps->projectiles[i].y = y - PROJECTILE_HEIGHT / 2.0;
             ps->projectiles[i].vx = speed * cos(angle);
             ps->projectiles[i].vy = -speed * sin(angle);    // y axis is inverted
             ps->projectiles[i].angle = angle;
@@ -75,12 +76,14 @@ void Projectile_Update(ProjectileSystem *ps, Game *game) {
             p->angle = atan2(-p->vy, p->vx);
         }
 
-        // Boundary collision
-        if (p->x < 0 || p->x > game->w || 
-            p->y < 0 || p->y > game->h) {
+        // Collision
+        float hit_x, hit_y;
+        if (p->x < 0 || p->x > game->w || p->y < 0 || p->y > game->h
+            || Terrain_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h, &hit_x, &hit_y)) {
             p->state = PROJECTILE_EXPLODING;
             p->explosion_timer = 10;
-            Debug_Info("Projectile exploded at boundary");
+            Terrain_DestroyCircle(&game->terrain, p->x + p->w/2.0, p->y + p->h/2.0, BOMB_RADIUS);
+            Debug_Info("Projectile exploded!");
         }
     }
 }
@@ -94,14 +97,14 @@ void Projectile_Draw(ProjectileSystem *ps, SDL_Renderer *renderer) {
         if (p->state == PROJECTILE_EXPLODING) {
             // Draw explosion
             int radius = BOMB_RADIUS + (10 - p->explosion_timer);
-            filledCircleRGBA(renderer, p->x, p->y, radius, 
+            filledCircleRGBA(renderer, p->x + p->w/2.0, p->y + p->h/2.0, radius, 
                            255, 200, 0, 100 + p->explosion_timer * 15);
             continue;
         }
 
         // Draw active projectile
         if (ps->sprites[0]) {
-            SDL_Rect rect = { p->x - p->w/2.0, p->y - p->h/2.0, p->w, p->h };
+            SDL_Rect rect = { p->x, p->y, p->w, p->h };
             SDL_RenderCopyEx(renderer, ps->sprites[0], NULL, &rect,
                            p->angle * 180 / CONST_PI, NULL, SDL_FLIP_NONE);
         } else {

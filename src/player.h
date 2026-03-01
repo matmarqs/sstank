@@ -7,7 +7,7 @@
 #include "input_mapper.h"
 
 #define SPEED      (300)   /* speed in pixels/sec */
-#define BASE_PLAYER_HEIGHT  (50)
+#define BASE_PLAYER_HEIGHT  (60)
 
 #define NUM_SPRITES (3)
 

@@ -72,9 +72,6 @@ void Player_Update(Player *p, Game *game) {
             Projectile_Throw(&game->projectile_sys, start_x, start_y, p->angle_render, 150, p->id);
             p->projectile_timer = 20;
         }
-        else {
-            Debug_Info("Cannot throw projectile: projectile_timer = %d", p->projectile_timer);
-        }
     }
 
     if (p->vx == 0) {

@@ -8,11 +8,14 @@
 #define TRUE  (1)
 #define FALSE (0)
 
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+
 #define SUCCESS (1)
 #define FAILURE (0)
 
-#define WORLD_WIDTH  (1920)
-#define WORLD_HEIGHT (1200)
+#define WORLD_WIDTH  (2880)
+#define WORLD_HEIGHT (1800)
 
 #define GAME_TITLE  "Projectile Game"
 

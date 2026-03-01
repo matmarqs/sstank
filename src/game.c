@@ -5,6 +5,7 @@
 
 #include "game_init.c"
 #include "projectile.h"
+#include "terrain.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 
@@ -15,6 +16,10 @@ int main() {
 
     /* Loading the game */
     Game_Init(&game);
+    Terrain_Init(&game.terrain, game.renderer);
+    Terrain_LoadFromPNG(&game.terrain, game.renderer,
+                        "assets/img/maptest_background.png",
+                        "assets/img/maptest_foreground.png");
     Init_Players(game.players);
 
     Debug_Info("Game initialized successfully!");
@@ -104,13 +109,12 @@ int Game_Update(Game *game) {
 }
 
 void Game_Draw(Game *game) {
-    // Set the viewport - SDL does the scaling automatically!
-    //SDL_RenderSetViewport(game->renderer, &game->camera.viewport);
-
-    /* blue background */           /*  red green blue alpha */
-    SDL_SetRenderDrawColor(game->renderer, 128, 128, 255, 100);
+    ///* blue background */           /*  red green blue alpha */
+    //SDL_SetRenderDrawColor(game->renderer, 128, 128, 255, 100);
     /* clear the window */
     SDL_RenderClear(game->renderer);
+
+    Terrain_Render(&game->terrain, game->renderer);
 
     /* draw the image to the window */
     for (int i = 0; i < 2; i++) {
@@ -126,6 +130,7 @@ void Game_Clean(Game *game) {
     for (int i = 0; i < 2; i++) {
         Player_Clean(&game->players[i]);
     }
+    Terrain_Clean(&game->terrain);
     if (game->renderer) SDL_DestroyRenderer(game->renderer);
     if (game->window) SDL_DestroyWindow(game->window);
 }

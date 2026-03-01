@@ -5,6 +5,7 @@
 #include "player.h"
 #include "input.h"
 #include "projectile.h"
+#include "terrain.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
@@ -25,6 +26,8 @@ struct Game {
     SDL_Renderer *renderer;
 
     SDL_Event event;
+
+    Terrain terrain;
 
     Input input;
 
