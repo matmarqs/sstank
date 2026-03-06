@@ -18,6 +18,8 @@ typedef struct {
 
     int on_ground;
 
+    int alive;
+
     float w, h;
     float w_over_h;
     float w_render, h_render;

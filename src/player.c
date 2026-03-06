@@ -35,14 +35,17 @@ int Player_Load(Player *p, SDL_Renderer *renderer) {
     p->facing_right = TRUE;
     p->projectile_timer = 0;
     p->on_ground = 0;
+    p->alive = 1;
 
     return SUCCESS;
 }
 
 void Player_Update(Player *p, Game *game) {
-    Player_ShootingHandler(p, game);
-    Player_MovementHandler(p, game);
-    Player_AnimationHandler(p, game);
+    if (p->alive) {
+        Player_ShootingHandler(p, game);
+        Player_MovementHandler(p, game);
+        Player_AnimationHandler(p, game);
+    }
 }
 
 void Player_ShootingHandler(Player *p, Game *game) {
@@ -104,8 +107,11 @@ void Player_MovementHandler(Player *p, Game *game) {
     // World bounds
     if (p->x < 0) p->x = 0;
     if (p->x > WORLD_WIDTH - p->w) p->x = WORLD_WIDTH - p->w;
-    if (p->y < 0) p->y = 0;
-    if (p->y > WORLD_HEIGHT - p->h) p->y = WORLD_HEIGHT - p->h;
+    if (p->y > WORLD_HEIGHT) {
+        p->y = WORLD_HEIGHT;
+        p->alive = 0;   /* the player is dead */
+        Debug_Info("Player %d is dead!", p->id);
+    }
 }
 
 void Player_AnimationHandler(Player *p, Game *game) {
@@ -119,29 +125,31 @@ void Player_AnimationHandler(Player *p, Game *game) {
 }
 
 void Player_Render(Player *p, SDL_Renderer *renderer) {
-    float x = p->x, y = p->y, w = p->w_render, h = p->h_render, theta = p->angle_render;
+    if (p->alive) {
+        float x = p->x, y = p->y, w = p->w_render, h = p->h_render, theta = p->angle_render;
 
-    SDL_Rect rect = { x, y, w, h };
-    SDL_RenderCopyEx(renderer, p->sprites[p->curr_sprite], NULL, &rect, 0, NULL, p->facing_right);
+        SDL_Rect rect = { x, y, w, h };
+        SDL_RenderCopyEx(renderer, p->sprites[p->curr_sprite], NULL, &rect, 0, NULL, p->facing_right);
 
-    int center_x = x + w/2;
-    int center_y = y + h/2;
-    float dx = x - center_x;
-    float dy = y - center_y;
-    float radius = sqrt(dx*dx + dy*dy);
-    float norm = 50;
+        int center_x = x + w/2;
+        int center_y = y + h/2;
+        float dx = x - center_x;
+        float dy = y - center_y;
+        float radius = sqrt(dx*dx + dy*dy);
+        float norm = 50;
 
-    float start_x = center_x + (radius) * cos(theta);
-    float start_y = center_y + (radius) * (-sin(theta));   // y axis is inverted
-    float end_x = center_x + (radius + norm) * cos(theta);
-    float end_y = center_y + (radius + norm) * (-sin(theta));   // y axis is inverted
+        float start_x = center_x + (radius) * cos(theta);
+        float start_y = center_y + (radius) * (-sin(theta));   // y axis is inverted
+        float end_x = center_x + (radius + norm) * cos(theta);
+        float end_y = center_y + (radius + norm) * (-sin(theta));   // y axis is inverted
 
-    circleRGBA(renderer, center_x, center_y, radius, 0, 0, 0, 255);
+        circleRGBA(renderer, center_x, center_y, radius, 0, 0, 0, 255);
 
-    //Debug_Info("theta = %f\n", theta * 360 / (2*CONST_PI));
+        //Debug_Info("theta = %f\n", theta * 360 / (2*CONST_PI));
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawLine(renderer, start_x, start_y, end_x, end_y);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawLine(renderer, start_x, start_y, end_x, end_y);
+    }
 }
 
 void Player_Clean(Player *p) {
