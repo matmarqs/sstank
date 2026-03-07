@@ -21,6 +21,10 @@ int ThrowBomb_Player0(Input *input) {
     return input->enter;  // Enter/Return key
 }
 
+int CycleArm_Player0(Input *input) {
+    return input->r_ctrl;
+}
+
 int MoveLeft_Player1(Input *input) {
     return input->a && !input->d;
 }
@@ -41,6 +45,10 @@ int ThrowBomb_Player1(Input *input) {
     return input->space;  // Space bar
 }
 
+int CycleArm_Player1(Input *input) {
+    return input->l_shift;
+}
+
 void Init_Player0(Player *p) {
     p->id = 0;
     p->sprites_path[0] = "assets/img/gato_maca0.png";
@@ -54,6 +62,7 @@ void Init_Player0(Player *p) {
     p->input_mapper.increase_angle = IncreaseAngle_Player0;
     p->input_mapper.decrease_angle = DecreaseAngle_Player0;
     p->input_mapper.throw_projectile = ThrowBomb_Player0;
+    p->input_mapper.cycle_arm = CycleArm_Player0;
 }
 
 void Init_Player1(Player *p) {
@@ -69,6 +78,7 @@ void Init_Player1(Player *p) {
     p->input_mapper.increase_angle = IncreaseAngle_Player1;
     p->input_mapper.decrease_angle = DecreaseAngle_Player1;
     p->input_mapper.throw_projectile = ThrowBomb_Player1;
+    p->input_mapper.cycle_arm = CycleArm_Player1;
 }
 
 void Init_Players(Player p[]) {

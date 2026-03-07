@@ -29,6 +29,9 @@ typedef struct {
 
     int damage_timer;
 
+    int change_arm_timer;
+    int curr_arm;
+
     float w, h;
     float w_over_h;
     float w_render, h_render;
@@ -53,6 +56,8 @@ void Player_Update(Player *p, Game *game);
 
 void Player_RenderPowerGauge(Player *p, SDL_Renderer *renderer);
 void Player_Render(Player *p, SDL_Renderer *renderer);
+
+void Player_Teleport(Player *p, float x, float y);
 
 void Player_Clean(Player *p);
 

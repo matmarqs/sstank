@@ -17,13 +17,13 @@ typedef enum {
 } ProjectileState;
 
 typedef struct {
+    int type;
     float x, y;
     float vx, vy;
     float angle;
     float w, h;
-    int curr_sprite;
     ProjectileState state;
-    int facing_right;
+    int facing_left;
     int owner;
     int explosion_timer;
 } Projectile;
@@ -39,7 +39,7 @@ void Projectile_Update(ProjectileSystem *ps, Game *game);
 void Projectile_Render(ProjectileSystem *ps, SDL_Renderer *renderer);
 void Projectile_Clean(ProjectileSystem *ps);
 
-void Projectile_Throw(ProjectileSystem *ps, float x, float y, float angle, float power, int owner);
+void Projectile_Throw(ProjectileSystem *ps, int type, float x, float y, float angle, float power, int owner);
 void Projectile_RemoveInactive(ProjectileSystem *ps);
 
 #endif

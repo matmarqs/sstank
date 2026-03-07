@@ -34,6 +34,8 @@ int Player_Load(Player *p, SDL_Renderer *renderer) {
     p->curr_sprite = 1;
     p->facing_right = TRUE;
     p->projectile_timer = 0;
+    p->change_arm_timer = 0;
+    p->curr_arm = 0;
     p->on_ground = 0;
     p->alive = 1;
     p->throwing = 0;
@@ -42,6 +44,13 @@ int Player_Load(Player *p, SDL_Renderer *renderer) {
     p->damage_timer = 0;
 
     return SUCCESS;
+}
+
+void Player_Teleport(Player *p, float x, float y) {
+    p->x = x;
+    p->y = y;
+    p->vx = 0;
+    p->vy = 0;
 }
 
 void Player_Update(Player *p, Game *game) {
@@ -74,6 +83,20 @@ void Player_ShootingHandler(Player *p, Game *game) {
     if (p->projectile_timer <= 0)
         p->projectile_timer = 0;
 
+    p->change_arm_timer--;
+    if (p->change_arm_timer <= 0)
+        p->change_arm_timer = 0;
+
+    int holding_change_arm = p->input_mapper.cycle_arm(&game->input);
+
+    if (!p->change_arm_timer) {
+        if (holding_change_arm) {
+            p->change_arm_timer = 15;
+            p->curr_arm = (p->curr_arm + 1) % 2;
+            Debug_Info("Current arm %d", p->curr_arm);
+        }
+    }
+
     int holding_throw = p->input_mapper.throw_projectile(&game->input);
 
     if (!p->projectile_timer) { /* timer has to be zero, in order for the throwing logic to happen */
@@ -96,7 +119,7 @@ void Player_ShootingHandler(Player *p, Game *game) {
                 float start_x = center_x + radius * cos(p->angle_render);
                 float start_y = center_y + radius * (-sin(p->angle_render));
 
-                Projectile_Throw(&game->projectile_sys, start_x, start_y, p->angle_render, p->power, p->id);
+                Projectile_Throw(&game->projectile_sys, p->curr_arm, start_x, start_y, p->angle_render, p->power, p->id);
                 p->projectile_timer = 30;
 
                 Debug_Info("Player %d throwed bomb with power %d", p->id, p->power);

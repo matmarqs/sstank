@@ -9,6 +9,7 @@ typedef struct {
     int (*increase_angle)(Input *input);
     int (*decrease_angle)(Input *input);
     int (*throw_projectile)(Input *input);
+    int (*cycle_arm)(Input *input);
 } InputMapper;
 
 #endif
