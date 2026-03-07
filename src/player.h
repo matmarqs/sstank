@@ -8,6 +8,8 @@
 #define SPEED      (300)   /* speed in pixels/sec */
 #define BASE_PLAYER_HEIGHT  (60)
 
+#define MAX_POWER   500
+
 #define NUM_SPRITES (3)
 
 typedef struct {
@@ -19,6 +21,13 @@ typedef struct {
     int on_ground;
 
     int alive;
+
+    int throwing;
+    int power;
+
+    float health;
+
+    int damage_timer;
 
     float w, h;
     float w_over_h;
@@ -41,7 +50,10 @@ typedef struct {
 
 int Player_Load(Player *p, SDL_Renderer *renderer);
 void Player_Update(Player *p, Game *game);
+
+void Player_RenderPowerGauge(Player *p, SDL_Renderer *renderer);
 void Player_Render(Player *p, SDL_Renderer *renderer);
+
 void Player_Clean(Player *p);
 
 void Player_ShootingHandler(Player *p, Game *game);

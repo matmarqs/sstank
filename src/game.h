@@ -17,6 +17,8 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <stdlib.h>
 
+#define NUM_PLAYERS 2
+
 struct Game {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -27,7 +29,7 @@ struct Game {
 
     Input input;
 
-    Player players[2];
+    Player players[NUM_PLAYERS];
 
     ProjectileSystem projectile_sys;
 

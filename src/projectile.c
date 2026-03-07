@@ -51,6 +51,22 @@ void Projectile_Throw(ProjectileSystem *ps, float x, float y, float angle, float
     }
 }
 
+// Check if circle (explosion) intersects rectangle (player)
+int CircleRectCollision(float circle_x, float circle_y, float radius,
+                        float rect_x, float rect_y, float rect_w, float rect_h) {
+
+    // Find closest point on rectangle to circle
+    float closest_x = fmax(rect_x, fmin(circle_x, rect_x + rect_w));
+    float closest_y = fmax(rect_y, fmin(circle_y, rect_y + rect_h));
+
+    // Calculate distance from circle center to this closest point
+    float dx = circle_x - closest_x;
+    float dy = circle_y - closest_y;
+    float dist_sq = dx*dx + dy*dy;
+
+    return dist_sq <= radius * radius;
+}
+
 void Projectile_Update(ProjectileSystem *ps, Game *game) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->projectiles[i];
@@ -81,7 +97,19 @@ void Projectile_Update(ProjectileSystem *ps, Game *game) {
             || Terrain_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h)) {
             p->state = PROJECTILE_EXPLODING;
             p->explosion_timer = 10;
-            Terrain_DestroyCircle(&game->terrain, p->x + p->w/2.0, p->y + p->h/2.0, BOMB_RADIUS);
+            float cx = p->x + p->w/2.0;
+            float cy = p->y + p->h/2.0;
+            Terrain_DestroyCircle(&game->terrain, cx, cy, BOMB_RADIUS);
+            for (int i = 0; i < NUM_PLAYERS; i++) {
+                Player *player = &game->players[i];
+                if (!player->alive) continue;
+                if (CircleRectCollision(cx, cy, BOMB_RADIUS,
+                                        player->x, player->y, 
+                                        player->w, player->h)) {
+                    player->health -= 20;
+                    player->damage_timer = 60;
+                }
+            }
             Debug_Info("Projectile exploded!");
         }
     }
