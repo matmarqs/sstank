@@ -10,7 +10,7 @@
 
 #define MAX_POWER   500
 
-#define NUM_SPRITES (3)
+#define NUM_SPRITES 12
 
 typedef struct {
     int id;
@@ -37,6 +37,7 @@ typedef struct {
     float w_render, h_render;
 
     int facing_right;
+    int sprite_inverted;
 
     float angle;
     float angle_render;
@@ -47,7 +48,7 @@ typedef struct {
 
     int projectile_timer;
 
-    char *sprites_path[3];
+    char *sprites_path[NUM_SPRITES];
     SDL_Texture *sprites[NUM_SPRITES];
 } Player;
 

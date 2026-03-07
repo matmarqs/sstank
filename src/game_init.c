@@ -51,9 +51,23 @@ int CycleArm_Player1(Input *input) {
 
 void Init_Player0(Player *p) {
     p->id = 0;
-    p->sprites_path[0] = "assets/img/gato_maca0.png";
-    p->sprites_path[1] = "assets/img/gato_maca1.png";
-    p->sprites_path[2] = "assets/img/gato_maca2.png";
+    p->sprite_inverted = FALSE;
+    /* idle */
+    p->sprites_path[ 0] = "assets/img/gato_maca0.png";
+    p->sprites_path[ 1] = "assets/img/gato_maca0.png";
+    p->sprites_path[ 2] = "assets/img/gato_maca0.png";
+    p->sprites_path[ 3] = "assets/img/gato_maca0.png";
+    p->sprites_path[ 4] = "assets/img/gato_maca0.png";
+
+    /* running */
+    p->sprites_path[ 5] = "assets/img/gato_maca1.png";
+    p->sprites_path[ 6] = "assets/img/gato_maca2.png";
+    p->sprites_path[ 7] = "assets/img/gato_maca0.png";
+    p->sprites_path[ 8] = "assets/img/gato_maca1.png";
+    p->sprites_path[ 9] = "assets/img/gato_maca2.png";
+    p->sprites_path[10] = "assets/img/gato_maca0.png";
+    p->sprites_path[11] = "assets/img/gato_maca1.png";
+
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
     }
@@ -67,9 +81,24 @@ void Init_Player0(Player *p) {
 
 void Init_Player1(Player *p) {
     p->id = 1;
-    p->sprites_path[0] = "assets/img/gato_banana0.png";
-    p->sprites_path[1] = "assets/img/gato_banana1.png";
-    p->sprites_path[2] = "assets/img/gato_banana2.png";
+    p->sprite_inverted = TRUE;
+
+    /* idle */
+    p->sprites_path[ 0] = "assets/img/sonic_idle_0.png";
+    p->sprites_path[ 1] = "assets/img/sonic_idle_1.png";
+    p->sprites_path[ 2] = "assets/img/sonic_idle_2.png";
+    p->sprites_path[ 3] = "assets/img/sonic_idle_3.png";
+    p->sprites_path[ 4] = "assets/img/sonic_idle_4.png";
+
+    /* running */
+    p->sprites_path[ 5] = "assets/img/sonic_running_0.png";
+    p->sprites_path[ 6] = "assets/img/sonic_running_1.png";
+    p->sprites_path[ 7] = "assets/img/sonic_running_2.png";
+    p->sprites_path[ 8] = "assets/img/sonic_running_3.png";
+    p->sprites_path[ 9] = "assets/img/sonic_running_4.png";
+    p->sprites_path[10] = "assets/img/sonic_running_5.png";
+    p->sprites_path[11] = "assets/img/sonic_running_6.png";
+
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
     }

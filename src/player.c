@@ -7,12 +7,24 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
 
+int loop_integer(int i, int n) {
+    int period = 2 * (n - 1);  // For n=6, period = 10
+    int t = i % period;
+    if (t < n) {
+        return t;           // 0,1,2,3,4,5
+    } else {
+        return period - t;  // 4,3,2,1
+    }
+}
+
 int Player_Load(Player *p, SDL_Renderer *renderer) {
     for (int i = 0; i < NUM_SPRITES; i++) {
-        p->sprites[i] = IMG_LoadTexture(renderer, p->sprites_path[i]);
-        if (!p->sprites[i]) {
-            Debug_Error("Player_Load error: error loading image %s\n", p->sprites_path[i]);
-            return FAILURE;
+        if (p->sprites_path[i]) {
+            p->sprites[i] = IMG_LoadTexture(renderer, p->sprites_path[i]);
+            if (!p->sprites[i]) {
+                Debug_Error("Player_Load error: error loading image %s\n", p->sprites_path[i]);
+                return FAILURE;
+            }
         }
     }
     int w, h;
@@ -31,8 +43,8 @@ int Player_Load(Player *p, SDL_Renderer *renderer) {
     p->vx = 0; p->vy = 0;
     p->angle = 0;
     p->angle_render = 0;
-    p->curr_sprite = 1;
-    p->facing_right = TRUE;
+    p->curr_sprite = 0;
+    p->facing_right = !p->sprite_inverted;
     p->projectile_timer = 0;
     p->change_arm_timer = 0;
     p->curr_arm = 0;
@@ -170,11 +182,16 @@ void Player_MovementHandler(Player *p, Game *game) {
 
 void Player_AnimationHandler(Player *p, Game *game) {
     // Animation
+    int t = game->time;
     if (p->vx == 0) {
-        p->curr_sprite = 1;
+        p->curr_sprite = loop_integer(t / 8, 5);
     } else {
-        int t = game->time % 30;
-        p->curr_sprite = (t < 10) ? 0 : (t < 20) ? 1 : 2;
+        if (p->id == 0) {
+            p->curr_sprite = 5 + loop_integer(t / 10, 7);
+        }
+        else {
+            p->curr_sprite = 5 + loop_integer(t / 5, 7);
+        }
     }
 }
 
@@ -251,7 +268,7 @@ void Player_Render(Player *p, SDL_Renderer *renderer) {
         float x = p->x, y = p->y, w = p->w_render, h = p->h_render, theta = p->angle_render;
 
         SDL_Rect rect = { x, y, w, h };
-        SDL_RenderCopyEx(renderer, p->sprites[p->curr_sprite], NULL, &rect, 0, NULL, p->facing_right);
+        SDL_RenderCopyEx(renderer, p->sprites[p->curr_sprite], NULL, &rect, 0, NULL, p->sprite_inverted ? !p->facing_right : p->facing_right);
 
         int center_x = x + w/2;
         int center_y = y + h/2;

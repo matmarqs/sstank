@@ -109,7 +109,7 @@ void Projectile_Update(ProjectileSystem *ps, Game *game) {
         }
 
         // Collision
-        if (p->x < 0 || p->x > game->w || p->y > game->h) {
+        if (p->x < -p->w || p->x > game->w || p->y > game->h) {
             p->state = PROJECTILE_INACTIVE;
         }
         else if (Terrain_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h)) {
