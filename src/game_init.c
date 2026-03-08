@@ -51,22 +51,22 @@ int CycleArm_Player1(Input *input) {
 
 void Init_Player0(Player *p) {
     p->id = 0;
-    p->sprite_inverted = FALSE;
+    p->sprite_inverted = TRUE;
     /* idle */
-    p->sprites_path[ 0] = "assets/img/gato_maca0.png";
-    p->sprites_path[ 1] = "assets/img/gato_maca0.png";
-    p->sprites_path[ 2] = "assets/img/gato_maca0.png";
-    p->sprites_path[ 3] = "assets/img/gato_maca0.png";
-    p->sprites_path[ 4] = "assets/img/gato_maca0.png";
+    p->sprites_path[ 0] = "assets/img/kirby_idle_0.png";
+    p->sprites_path[ 1] = "assets/img/kirby_idle_0.png";
+    p->sprites_path[ 2] = "assets/img/kirby_idle_0.png";
+    p->sprites_path[ 3] = "assets/img/kirby_idle_1.png";
+    p->sprites_path[ 4] = "assets/img/kirby_idle_1.png";
 
     /* running */
-    p->sprites_path[ 5] = "assets/img/gato_maca1.png";
-    p->sprites_path[ 6] = "assets/img/gato_maca2.png";
-    p->sprites_path[ 7] = "assets/img/gato_maca0.png";
-    p->sprites_path[ 8] = "assets/img/gato_maca1.png";
-    p->sprites_path[ 9] = "assets/img/gato_maca2.png";
-    p->sprites_path[10] = "assets/img/gato_maca0.png";
-    p->sprites_path[11] = "assets/img/gato_maca1.png";
+    p->sprites_path[ 5] = "assets/img/kirby_running_0.png";
+    p->sprites_path[ 6] = "assets/img/kirby_running_2.png";
+    p->sprites_path[ 7] = "assets/img/kirby_running_3.png";
+    p->sprites_path[ 8] = "assets/img/kirby_running_4.png";
+    p->sprites_path[ 9] = "assets/img/kirby_running_0.png";
+    p->sprites_path[10] = "assets/img/kirby_running_2.png";
+    p->sprites_path[11] = "assets/img/kirby_running_3.png";
 
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
