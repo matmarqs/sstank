@@ -29,10 +29,9 @@ int Player_Load(Player *p, SDL_Renderer *renderer) {
     }
     int w, h;
     SDL_QueryTexture(p->sprites[0], NULL, NULL, &w, &h);
-    p->w_over_h = w / (1.0 * h);
 
-    p->h_render = BASE_PLAYER_HEIGHT;
-    p->w_render = BASE_PLAYER_HEIGHT * p->w_over_h;
+    p->w_render = BASE_PLAYER_WIDTH;
+    p->h_render = BASE_PLAYER_HEIGHT * ((float) h) / w;
 
     float hitbox_factor = 2.0 / 3;
     p->w = p->w_render * hitbox_factor;

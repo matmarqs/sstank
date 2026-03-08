@@ -7,6 +7,7 @@
 
 #define SPEED      (300)   /* speed in pixels/sec */
 #define BASE_PLAYER_HEIGHT  (60)
+#define BASE_PLAYER_WIDTH  (60)
 
 #define MAX_POWER   500
 
@@ -33,7 +34,6 @@ typedef struct {
     int curr_arm;
 
     float w, h;
-    float w_over_h;
     float w_render, h_render;
 
     int facing_right;
