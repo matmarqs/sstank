@@ -1,12 +1,13 @@
-#include "../common/common.h"
-#include "../common/debug.h"
+#include "client.h"
+#include "client_init.h"
 
-#include "game.h"
-#include "game_init.h"
-#include "player.h"
-#include "terrain.h"
-#include "projectile.h"
-#include "input.h"
+#include "../shared/common/common.h"
+#include "../shared/common/debug.h"
+
+#include "../shared/logic/player.h"
+#include "../shared/logic/terrain.h"
+#include "../shared/logic/projectile.h"
+#include "../shared/logic/input.h"
 
 int main() {
     Debug_StartTimer();
@@ -14,37 +15,37 @@ int main() {
     Game game;
 
     /* Loading the game */
-    Game_Init(&game);
+    Client_Init(&game);
     Terrain_Init(&game.terrain, game.renderer);
     Terrain_LoadFromPNG(&game.terrain, game.renderer,
                         "assets/img/maptest_background.png",
                         "assets/img/maptest_foreground.png");
-    Init_Players(game.players);
+    ClientInit_Players(game.players);
 
     Debug_Info("Game initialized successfully!");
 
-    Game_Load(&game);
+    Client_Load(&game);
 
     Debug_Info("Game loaded successfully!");
 
     /* Game loop */
     int done = FALSE;
     while (!done) {
-        done = Game_Update(&game);
-        Game_Render(&game);
+        done = Client_Update(&game);
+        Client_Render(&game);
         /* wait 1/60 seconds (assuming our calculations take ZERO time) */
         SDL_Delay(1000/60);     /* the unit of this is milliseconds */
     }
 
     /* Cleaning up everything and exiting */
-    Game_Clean(&game);
+    Client_Clean(&game);
     Debug_Info("Game cleaned successfully!");
 
     SDL_Quit();
     return EXIT_SUCCESS;
 }
 
-void Game_Init(Game *game) {
+void Client_Init(Game *game) {
     game->window = NULL;
     game->renderer = NULL;
 
@@ -75,7 +76,7 @@ void Game_Init(Game *game) {
     SDL_RenderSetLogicalSize(game->renderer, game->w, game->h); // automatic resizes to any resolution
 }
 
-void Game_Load(Game *game) {
+void Client_Load(Game *game) {
     game->time = 0;
 
     Input_InitKeys(&game->input);
@@ -83,17 +84,17 @@ void Game_Load(Game *game) {
     for (int i = 0; i < 2; i++) {
         int status = Player_Load(&game->players[i], game->renderer);
         if (status == FAILURE) {
-            Game_Clean(game);
+            Client_Clean(game);
         }
     }
 
     int status = Projectile_Load(&game->projectile_sys, game->renderer);
     if (status == FAILURE) {
-        Game_Clean(game);
+        Client_Clean(game);
     }
 }
 
-int Game_Update(Game *game) {
+int Client_Update(Game *game) {
     game->time++;
 
     int done = Input_SetEvents(&game->event, &game->input);
@@ -107,7 +108,7 @@ int Game_Update(Game *game) {
     return done;
 }
 
-void Game_Render(Game *game) {
+void Client_Render(Game *game) {
     /* black background */           /*  red green blue alpha */
     SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
     /* clear the window */
@@ -125,7 +126,7 @@ void Game_Render(Game *game) {
     SDL_RenderPresent(game->renderer);
 }
 
-void Game_Clean(Game *game) {
+void Client_Clean(Game *game) {
     for (int i = 0; i < 2; i++) {
         Player_Clean(&game->players[i]);
     }
