@@ -1,20 +1,4 @@
 #include "debug.h"
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
-// Color codes for terminal output (optional)
-#define COLOR_RED     "\x1b[31m"
-#define COLOR_YELLOW  "\x1b[33m"
-#define COLOR_GREEN   "\x1b[32m"
-#define COLOR_BLUE    "\x1b[34m"
-#define COLOR_RESET   "\x1b[0m"
 
 static FILE *debug_log_file = NULL;
 static int debug_use_colors = 1;  // Set to 0 if outputting to file

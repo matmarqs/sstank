@@ -1,11 +1,15 @@
+#include <SDL2/SDL_image.h> // IMG_LoadTexture
+#include <SDL2/SDL_render.h> // SDL_RenderCopyEx
+#include <SDL2/SDL2_gfxPrimitives.h> // filledCircleRGBA
+#include <math.h> // sin, cos
+
+#include "../common/common.h"
+#include "../common/debug.h"
+
 #include "projectile.h"
-#include "common.h"
-#include "game.h"
-#include "debug.h"
-#include "terrain.h"
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_render.h>
-#include <math.h>
+#include "terrain.h" // Terrain_CheckCollision
+#include "player.h" // Player_Teleport
+
 
 int Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer) {
     ps->sprites[0] = IMG_LoadTexture(renderer, "assets/img/toppng.com-bombs-1668x1686.png");

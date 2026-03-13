@@ -1,7 +1,7 @@
-#ifndef INPUT_MAPPER_H
-#define INPUT_MAPPER_H
+#ifndef _STRUCT_INPUT_MAPPER_H
+#define _STRUCT_INPUT_MAPPER_H
 
-#include "input.h"
+#include "st_input.h"
 
 typedef struct {
     int (*move_left)(Input *input);

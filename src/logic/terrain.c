@@ -1,6 +1,9 @@
+#include <SDL2/SDL_image.h>
+
+#include "../common/common.h"
+#include "../common/debug.h"
+
 #include "terrain.h"
-#include "debug.h"
-#include <string.h>
 
 static inline int mask_index(int width, int x, int y) {
     return y * width + x;

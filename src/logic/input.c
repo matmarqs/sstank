@@ -1,5 +1,6 @@
+#include "../common/common.h"
+
 #include "input.h"
-#include <SDL2/SDL_scancode.h>
 
 void Input_InitKeys(Input *input) {
     input->up = input->left = input->down = input->right = input->space = input->l_shift = FALSE;

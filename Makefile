@@ -5,7 +5,7 @@ LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_image SDL2_gfx SDL2_net) -lm
 TARGET = game.elf
 
 # Find ALL .c files recursively in src/ (if you add subdirectories later)
-SOURCES = $(shell find src -name "*.c" -not -name "game_init.c" -not -name "server.c")
+SOURCES = $(shell find src -name "*.c" -not -name "server.c")
 OBJECTS = $(SOURCES:.c=.o)
 
 $(TARGET): $(OBJECTS)
@@ -16,8 +16,3 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
-
-info:
-	@echo "Building from: $(SOURCES)"
-
-.PHONY: run info

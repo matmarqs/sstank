@@ -1,11 +1,13 @@
-#include "player.h"
-#include "debug.h"
-#include "game.h"
-#include "movement.h"
-#include "projectile.h"
-#include <SDL2/SDL2_gfxPrimitives.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_image.h> // IMG_LoadTexture
+#include <SDL2/SDL2_gfxPrimitives.h> // boxRGBA
+
+#include "../common/common.h"
+#include "../common/debug.h"
+#include "../common/config.h" // WORLD_WIDTH, WORLD_HEIGHT
+
+#include "player.h" // already includes "struct Game"
+#include "movement.h" // Movement_DeterminePlayerState
+#include "projectile.h" // Projectile_Throw
 
 int loop_integer(int i, int n) {
     int period = 2 * (n - 1);  // For n=6, period = 10

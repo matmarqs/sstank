@@ -1,13 +1,12 @@
-#include "game.h"
-#include "common.h"
-#include "input.h"
-#include "debug.h"
+#include "../common/common.h"
+#include "../common/debug.h"
 
-#include "game_init.c"
-#include "projectile.h"
+#include "game.h"
+#include "game_init.h"
+#include "player.h"
 #include "terrain.h"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
+#include "projectile.h"
+#include "input.h"
 
 int main() {
     Debug_StartTimer();

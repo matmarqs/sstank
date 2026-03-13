@@ -1,5 +1,7 @@
-#include "debug.h"
-#include "player.h"
+#include "../common/common.h"
+#include "../common/debug.h"
+
+#include "game_init.h"
 
 int MoveLeft_Player0(Input *input) {
     return input->left && !input->right;
