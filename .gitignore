@@ -1,5 +1,8 @@
+build/
 references/
 assets/
+
 **/*.o
 **/*.elf
 **/*.exe
+**/*.d

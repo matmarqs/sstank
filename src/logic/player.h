@@ -7,7 +7,7 @@
 
 #define SPEED 300   /* speed in pixels/sec */
 #define BASE_PLAYER_HEIGHT 60
-#define BASE_PLAYER_WIDTH 60
+#define BASE_PLAYER_WIDTH BASE_PLAYER_HEIGHT
 
 #define MAX_POWER 500
 
