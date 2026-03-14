@@ -2,7 +2,7 @@
 #include "../common/common.h"
 #include "../common/debug.h"
 
-void NetProtocol_SendPacket(TCPsocket socket_to_send, PacketID packet_id, void *data, int len_data, char *debug_string) {
+static void NetProtocol_SendPacket(TCPsocket socket_to_send, PacketID packet_id, void *data, int len_data, char *debug_string) {
     char buffer[sizeof(PacketID) + len_data];
     int offset = 0;
     buffer[offset] = packet_id;

@@ -38,6 +38,8 @@ typedef struct {
 
     int curr_sprite;
 
+    Input input;
+
     InputMapper input_mapper;
 
     int projectile_timer;

@@ -4,51 +4,27 @@
 #include "../shared/common/debug.h"
 
 
-int ClientInit_MoveLeft_Player0(Input *input) {
-    return input->left && !input->right;
-}
-
-int ClientInit_MoveRight_Player0(Input *input) {
-    return !input->left && input->right;
-}
-
-int ClientInit_IncreaseAngle_Player0(Input *input) {
-    return input->up && !input->down;
-}
-
-int ClientInit_DecreaseAngle_Player0(Input *input) {
-    return !input->up && input->down;
-}
-
-int ClientInit_ThrowBomb_Player0(Input *input) {
-    return input->enter;  // Enter/Return key
-}
-
-int ClientInit_CycleArm_Player0(Input *input) {
-    return input->r_ctrl;
-}
-
-int ClientInit_MoveLeft_Player1(Input *input) {
+int ClientInit_MoveLeft(Input *input) {
     return input->a && !input->d;
 }
 
-int ClientInit_MoveRight_Player1(Input *input) {
+int ClientInit_MoveRight(Input *input) {
     return !input->a && input->d;
 }
 
-int ClientInit_IncreaseAngle_Player1(Input *input) {
+int ClientInit_IncreaseAngle(Input *input) {
     return input->w && !input->s;
 }
 
-int ClientInit_DecreaseAngle_Player1(Input *input) {
+int ClientInit_DecreaseAngle(Input *input) {
     return !input->w && input->s;
 }
 
-int ClientInit_ThrowBomb_Player1(Input *input) {
+int ClientInit_ThrowBomb(Input *input) {
     return input->space;  // Space bar
 }
 
-int ClientInit_CycleArm_Player1(Input *input) {
+int ClientInit_CycleArm(Input *input) {
     return input->l_shift;
 }
 
@@ -74,12 +50,12 @@ void ClientInit_Player0(Player *p) {
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
     }
-    p->input_mapper.move_left = ClientInit_MoveLeft_Player0;
-    p->input_mapper.move_right = ClientInit_MoveRight_Player0;
-    p->input_mapper.increase_angle = ClientInit_IncreaseAngle_Player0;
-    p->input_mapper.decrease_angle = ClientInit_DecreaseAngle_Player0;
-    p->input_mapper.throw_projectile = ClientInit_ThrowBomb_Player0;
-    p->input_mapper.cycle_arm = ClientInit_CycleArm_Player0;
+    p->input_mapper.move_left = ClientInit_MoveLeft;
+    p->input_mapper.move_right = ClientInit_MoveRight;
+    p->input_mapper.increase_angle = ClientInit_IncreaseAngle;
+    p->input_mapper.decrease_angle = ClientInit_DecreaseAngle;
+    p->input_mapper.throw_projectile = ClientInit_ThrowBomb;
+    p->input_mapper.cycle_arm = ClientInit_CycleArm;
 }
 
 void ClientInit_Player1(Player *p) {
@@ -105,12 +81,12 @@ void ClientInit_Player1(Player *p) {
     for (int i = 0; i < NUM_SPRITES; i++) {
         Debug_Info("Loaded asset %s successfully", p->sprites_path[i]);
     }
-    p->input_mapper.move_left = ClientInit_MoveLeft_Player1;
-    p->input_mapper.move_right = ClientInit_MoveRight_Player1;
-    p->input_mapper.increase_angle = ClientInit_IncreaseAngle_Player1;
-    p->input_mapper.decrease_angle = ClientInit_DecreaseAngle_Player1;
-    p->input_mapper.throw_projectile = ClientInit_ThrowBomb_Player1;
-    p->input_mapper.cycle_arm = ClientInit_CycleArm_Player1;
+    p->input_mapper.move_left = ClientInit_MoveLeft;
+    p->input_mapper.move_right = ClientInit_MoveRight;
+    p->input_mapper.increase_angle = ClientInit_IncreaseAngle;
+    p->input_mapper.decrease_angle = ClientInit_DecreaseAngle;
+    p->input_mapper.throw_projectile = ClientInit_ThrowBomb;
+    p->input_mapper.cycle_arm = ClientInit_CycleArm;
 }
 
 void ClientInit_Players(Player p[]) {

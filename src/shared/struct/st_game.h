@@ -20,6 +20,9 @@ typedef struct Game {
 
     Input input;
 
+    int my_player_id;
+    int start;
+
     Player players[NUM_PLAYERS];
 
     ProjectileSystem projectile_sys;
@@ -29,6 +32,7 @@ typedef struct Game {
     int time;
 
     TCPsocket server_socket;
+    SDLNet_SocketSet server_socket_set;
 } Game;
 
 #endif

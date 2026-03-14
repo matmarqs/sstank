@@ -8,6 +8,7 @@
 #include "player.h" // already includes "struct Game"
 #include "movement.h" // Movement_DeterminePlayerState
 #include "projectile.h" // Projectile_Throw
+#include "input.h"
 
 int loop_integer(int i, int n) {
     int period = 2 * (n - 1);  // For n=6, period = 10
@@ -55,6 +56,7 @@ int Player_Load(Player *p, SDL_Renderer *renderer) {
     p->power = 0;
     p->health = 100;
     p->damage_timer = 0;
+    Input_InitKeys(&p->input);
 
     return SUCCESS;
 }
@@ -81,11 +83,11 @@ void Player_Update(Player *p, Game *game) {
 
 void Player_ShootingHandler(Player *p, Game *game) {
     // 1. Handle aiming (doesn't affect movement)
-    if (p->input_mapper.increase_angle(&game->input)) {
+    if (p->input_mapper.increase_angle(&p->input)) {
         p->angle += (3/360.0) * 2 * CONST_PI;
         if (p->angle > CONST_PI/2) p->angle = CONST_PI/2;
     }
-    if (p->input_mapper.decrease_angle(&game->input)) {
+    if (p->input_mapper.decrease_angle(&p->input)) {
         p->angle -= (3/360.0) * 2 * CONST_PI;
         if (p->angle < 0) p->angle = 0;
     }
@@ -100,7 +102,7 @@ void Player_ShootingHandler(Player *p, Game *game) {
     if (p->change_arm_timer <= 0)
         p->change_arm_timer = 0;
 
-    int holding_change_arm = p->input_mapper.cycle_arm(&game->input);
+    int holding_change_arm = p->input_mapper.cycle_arm(&p->input);
 
     if (!p->change_arm_timer) {
         if (holding_change_arm) {
@@ -110,7 +112,7 @@ void Player_ShootingHandler(Player *p, Game *game) {
         }
     }
 
-    int holding_throw = p->input_mapper.throw_projectile(&game->input);
+    int holding_throw = p->input_mapper.throw_projectile(&p->input);
 
     if (!p->projectile_timer) { /* timer has to be zero, in order for the throwing logic to happen */
         if (!p->throwing) { /* NOT THROWING, CAN BEGIN THROWING */
@@ -148,11 +150,11 @@ void Player_ShootingHandler(Player *p, Game *game) {
 void Player_MovementHandler(Player *p, Game *game) {
     // 1. INPUT HANDLING (always runs, doesn't affect state)
     float input_vx = 0;
-    if (p->input_mapper.move_left(&game->input)) {
+    if (p->input_mapper.move_left(&p->input)) {
         input_vx = -SPEED;
         p->facing_right = FALSE;
     }
-    if (p->input_mapper.move_right(&game->input)) {
+    if (p->input_mapper.move_right(&p->input)) {
         input_vx = SPEED;
         p->facing_right = TRUE;
     }

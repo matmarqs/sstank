@@ -52,6 +52,13 @@ void Server_Init(Server *server) {
     Debug_Info("Server listening on IP %s port %d", ip_char, PORT);
 }
 
+void Server_Broadcast(Server *server, PacketID packet_id, void *data, int len) {
+    Client *clients = server->clients;
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        NetProtocol_SendPacketToClient(&clients[i], packet_id, data, len);
+    }
+}
+
 void Server_AcceptClients(Server *server) {
     while (1) {
         // Check for new connection
@@ -111,18 +118,12 @@ void Server_AcceptClients(Server *server) {
         }
 
         if (clients[0].active && clients[1].active) {
+            Server_Broadcast(server, PACKET_SERVER_GAME_START, NULL, 0);
             Debug_Info("Both clients connected! Starting game!");
             break;
         }
 
         SDL_Delay(10);
-    }
-}
-
-void Server_Broadcast(Server *server, PacketID packet_id, void *data, int len) {
-    Client *clients = server->clients;
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        NetProtocol_SendPacketToClient(&clients[i], packet_id, data, len);
     }
 }
 
@@ -150,7 +151,7 @@ void Server_Loop(Server *server) {
                     else {
                         // Got data! Forward to other client
                         int other = (i == 0) ? 1 : 0;
-                        NetProtocol_SendPacketToClient(&clients[other], PACKET_CLIENT_INPUT, buffer, bytes);
+                        NetProtocol_SendPacketToClient(&clients[other], PACKET_CLIENT_INPUT, buffer+1, bytes-1);
                     }
                 }
             }

@@ -8,8 +8,10 @@ typedef enum : uint8_t {
     PACKET_SERVER_WELCOME_YOUR_ID,
     PACKET_SERVER_IS_FULL,
     PACKET_SERVER_WAIT_OTHER_PLAYER,
+    PACKET_SERVER_GAME_START,
     PACKET_SERVER_OTHER_PLAYER_DISCONNECTED,
     PACKET_CLIENT_INPUT,
+    PACKET_MAX_FAKEPACKET,
 } PacketID;
 
 typedef struct {
@@ -18,7 +20,7 @@ typedef struct {
     int active;
 } Client;
 
-
 void NetProtocol_SendPacketToClient(Client *client, PacketID packet_id, void *data, int len_data);
+void NetProtocol_SendPacketToServer(TCPsocket socket_to_send, PacketID packet_id, void *data, int len_data);
 
 #endif

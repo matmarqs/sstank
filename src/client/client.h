@@ -11,6 +11,6 @@ SDL_Texture *Client_LoadImage(Game *game, char *img_path);
 void Client_Load(Game *game);
 int Client_Update(Game *game);
 void Client_Render(Game *game);
-void Client_Clean(Game *game);
+void Client_Clean(Game *game, int exit_code);
 
 #endif

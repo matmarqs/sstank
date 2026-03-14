@@ -12,4 +12,6 @@
 #define SUCCESS (1)
 #define FAILURE (0)
 
+#define UNUSED(x) (void)(x)
+
 #endif
