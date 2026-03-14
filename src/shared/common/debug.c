@@ -82,11 +82,16 @@ void Debug_LogIf(int condition, const char *format, ...) {
 #endif
 }
 
-void Debug_HexDump(const char *data, size_t len, const char *title) {
-#if DEBUG_LEVEL >= DEBUG_ALL
+void Debug_HexDump(const char *data, size_t len, const char *format, ...) {
+#if DEBUG_LEVEL >= DEBUG_INFO
     FILE *output = debug_log_file ? debug_log_file : stdout;
 
-    fprintf(output, "\n=== %s (%zu bytes) ===\n", title, len);
+    fprintf(output, "===================\n");
+
+    va_list args;
+    va_start(args, format);
+    debug_print(COLOR_GREEN, "HEXDUMP", format, args);
+    va_end(args);
 
     for (size_t i = 0; i < len; i += 16) {
         // Print offset

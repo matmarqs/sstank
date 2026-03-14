@@ -40,7 +40,7 @@ void Debug_Info(const char *format, ...);
 void Debug_LogIf(int condition, const char *format, ...);
 
 // Hex dump for debugging binary data
-void Debug_HexDump(const char *data, size_t len, const char *title);
+void Debug_HexDump(const char *data, size_t len, const char *format, ...);
 
 // Timing/debug info
 void Debug_StartTimer(void);

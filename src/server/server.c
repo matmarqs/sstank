@@ -2,15 +2,10 @@
 
 #include "../shared/common/debug.h"
 #include "../shared/net/net_utils.h"
+#include "../shared/net/net_protocol.h"
 
 #define PORT 5555
 #define MAX_CLIENTS 2
-
-typedef struct {
-    TCPsocket socket;
-    int id;
-    int active;
-} Client;
 
 typedef struct {
     Client clients[MAX_CLIENTS];
@@ -83,14 +78,11 @@ void Server_AcceptClients(Server *server) {
                 Debug_Info("Client %d connected", slot);
 
                 // Send welcome with ID
-                char welcome[32];
-                snprintf(welcome, sizeof(welcome), "ID: %d\n", slot);
-                SDLNet_TCP_Send(client_socket, welcome, strlen(welcome));
+                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SERVER_WELCOME_YOUR_ID, &slot, 4);
             }
             else {
                 // Server full
-                char *msg = "Server FULL\n\0";
-                SDLNet_TCP_Send(client_socket, msg, strlen(msg));
+                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SERVER_IS_FULL, NULL, 0);
                 SDLNet_TCP_Close(client_socket);
             }
         }
@@ -112,10 +104,7 @@ void Server_AcceptClients(Server *server) {
                     }
                     else {
                         // Got data, but the other client is not ready yet.
-                        if (clients[i].active) {
-                            char *msg = "Other player not ready yet\n\0";
-                            SDLNet_TCP_Send(clients[i].socket, msg, strlen(msg));
-                        }
+                        NetProtocol_SendPacketToClient(&clients[i], PACKET_SERVER_WAIT_OTHER_PLAYER, NULL, 0);
                     }
                 }
             }
@@ -130,12 +119,10 @@ void Server_AcceptClients(Server *server) {
     }
 }
 
-void Server_Broadcast(Server *server, const void *data, int len) {
+void Server_Broadcast(Server *server, PacketID packet_id, void *data, int len) {
     Client *clients = server->clients;
     for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (clients[i].active) {
-            SDLNet_TCP_Send(clients[i].socket, data, len);
-        }
+        NetProtocol_SendPacketToClient(&clients[i], packet_id, data, len);
     }
 }
 
@@ -162,20 +149,15 @@ void Server_Loop(Server *server) {
                     }
                     else {
                         // Got data! Forward to other client
-                        buffer[bytes] = '\0';
-                        Debug_Info("Client %d: %s", i, buffer);
                         int other = (i == 0) ? 1 : 0;
-                        if (clients[other].active) {
-                            SDLNet_TCP_Send(clients[other].socket, buffer, bytes);
-                        }
+                        NetProtocol_SendPacketToClient(&clients[other], PACKET_CLIENT_INPUT, buffer, bytes);
                     }
                 }
             }
 
             if (!clients[0].active || !clients[1].active) {
-                char *msg = "Other player disconnected, finalizing game\n\0";
-                Server_Broadcast(server, msg, strlen(msg));
-                Debug_Info(msg);
+                Server_Broadcast(server, PACKET_SERVER_OTHER_PLAYER_DISCONNECTED, NULL, 0);
+                Debug_Info("Some player disconnected. Ending game!");
                 break;
             }
         }
