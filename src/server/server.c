@@ -1,6 +1,7 @@
 #include <SDL2/SDL_net.h>
 
 #include "../shared/common/debug.h"
+#include "../shared/net/net_utils.h"
 
 #define PORT 5555
 #define MAX_CLIENTS 2
@@ -11,11 +12,13 @@ typedef struct {
     int active;
 } Client;
 
-static Client clients[MAX_CLIENTS];
-static TCPsocket server_socket;
-SDLNet_SocketSet socket_set;
+typedef struct {
+    Client clients[MAX_CLIENTS];
+    TCPsocket socket;
+    SDLNet_SocketSet socket_set;
+} Server;
 
-void Server_Init() {
+void Server_Init(Server *server) {
     // Create socket
     if (SDLNet_Init() < 0) {
         Debug_Error("SDLNet_Init failed: %s", SDLNet_GetError());
@@ -29,25 +32,34 @@ void Server_Init() {
         exit(1);
     }
 
-    server_socket = SDLNet_TCP_Open(&ip);
-    if (!server_socket) {
+    server->socket = SDLNet_TCP_Open(&ip);
+    if (!server->socket) {
         Debug_Error("SDLNet_TCP_Open failed: %s", SDLNet_GetError());
         exit(1);
     }
 
-    socket_set = SDLNet_AllocSocketSet(MAX_CLIENTS + 1);
-    if (!socket_set) {
+    server->socket_set = SDLNet_AllocSocketSet(MAX_CLIENTS);
+    if (!server->socket_set) {
         Debug_Error("SDLNet_AllocSocketSet failed: %s", SDLNet_GetError());
         exit(1);
     }
 
-    Debug_Info("Server listening on port %d", PORT);
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        server->clients[i].socket = 0;
+        server->clients[i].id = -1;
+        server->clients[i].active = 0;
+    }
+
+    char ip_char[16];
+    NetUtil_IPint32ToChar(ip.host, ip_char);
+    Debug_Info("Server listening on IP %s port %d", ip_char, PORT);
 }
 
-void Server_AcceptClients() {
+void Server_AcceptClients(Server *server) {
     while (1) {
         // Check for new connection
-        TCPsocket client_socket = SDLNet_TCP_Accept(server_socket);
+        TCPsocket client_socket = SDLNet_TCP_Accept(server->socket);
+        Client *clients = server->clients;
 
         if (client_socket) {
             // Find free slot
@@ -64,7 +76,7 @@ void Server_AcceptClients() {
                 clients[slot].id = slot;
                 clients[slot].active = 1;
 
-                SDLNet_TCP_AddSocket(socket_set, client_socket);
+                SDLNet_TCP_AddSocket(server->socket_set, client_socket);
 
                 Debug_Info("Client %d connected", slot);
 
@@ -90,7 +102,8 @@ void Server_AcceptClients() {
     }
 }
 
-void Server_Broadcast(const void *data, int len) {
+void Server_Broadcast(Server *server, const void *data, int len) {
+    Client *clients = server->clients;
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
             SDLNet_TCP_Send(clients[i].socket, data, len);
@@ -98,14 +111,15 @@ void Server_Broadcast(const void *data, int len) {
     }
 }
 
-void Server_Loop() {
+void Server_Loop(Server *server) {
     char buffer[1024];
+    Client *clients = server->clients;
 
     while (1) {
         // Check for activity
-        int active_sockets = SDLNet_CheckSockets(socket_set, 50);
+        int num_active_sockets = SDLNet_CheckSockets(server->socket_set, 50);
 
-        if (active_sockets > 0) {
+        if (num_active_sockets > 0) {
             // Check each client
             for (int i = 0; i < MAX_CLIENTS; i++) {
                 if (clients[i].active && SDLNet_SocketReady(clients[i].socket)) {
@@ -114,7 +128,7 @@ void Server_Loop() {
                     if (bytes <= 0) {
                         // Client disconnected
                         Debug_Info("Client %d disconnected", i);
-                        SDLNet_TCP_DelSocket(socket_set, clients[i].socket);
+                        SDLNet_TCP_DelSocket(server->socket_set, clients[i].socket);
                         SDLNet_TCP_Close(clients[i].socket);
                         clients[i].active = 0;
                     }
@@ -133,21 +147,23 @@ void Server_Loop() {
     }
 }
 
-void Server_Clean() {
+void Server_Clean(Server *server) {
+    Client *clients = server->clients;
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
             SDLNet_TCP_Close(clients[i].socket);
         }
     }
-    SDLNet_TCP_Close(server_socket);
-    SDLNet_FreeSocketSet(socket_set);
+    SDLNet_TCP_Close(server->socket);
+    SDLNet_FreeSocketSet(server->socket_set);
     SDLNet_Quit();
 }
 
 int main() {
-    Server_Init();
-    Server_AcceptClients();
-    Server_Loop();
-    Server_Clean();
+    Server server;
+    Server_Init(&server);
+    Server_AcceptClients(&server);
+    Server_Loop(&server);
+    Server_Clean(&server);
     return 0;
 }
