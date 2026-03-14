@@ -2,6 +2,7 @@
 #define _STRUCT_GAME_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_net.h>
 
 #include "st_player.h"
 #include "st_projectile.h"
@@ -26,6 +27,8 @@ typedef struct Game {
     int w, h;
 
     int time;
+
+    TCPsocket server_socket;
 } Game;
 
 #endif

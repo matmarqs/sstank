@@ -32,6 +32,10 @@ void Server_Init(Server *server) {
         exit(1);
     }
 
+    char ip_char[16];
+    NetUtil_IPint32ToChar(ip.host, ip_char);
+    Debug_Info("IP: %s", ip_char);
+
     server->socket = SDLNet_TCP_Open(&ip);
     if (!server->socket) {
         Debug_Error("SDLNet_TCP_Open failed: %s", SDLNet_GetError());
@@ -50,8 +54,6 @@ void Server_Init(Server *server) {
         server->clients[i].active = 0;
     }
 
-    char ip_char[16];
-    NetUtil_IPint32ToChar(ip.host, ip_char);
     Debug_Info("Server listening on IP %s port %d", ip_char, PORT);
 }
 
@@ -82,14 +84,40 @@ void Server_AcceptClients(Server *server) {
 
                 // Send welcome with ID
                 char welcome[32];
-                snprintf(welcome, sizeof(welcome), "ID:%d", slot);
+                snprintf(welcome, sizeof(welcome), "ID: %d\n", slot);
                 SDLNet_TCP_Send(client_socket, welcome, strlen(welcome));
             }
             else {
                 // Server full
-                char *msg = "FULL";
+                char *msg = "Server FULL\n\0";
                 SDLNet_TCP_Send(client_socket, msg, strlen(msg));
                 SDLNet_TCP_Close(client_socket);
+            }
+        }
+
+        int num_active_sockets = SDLNet_CheckSockets(server->socket_set, 50);
+        char buffer[1024];
+        if (num_active_sockets > 0) {
+            // Check each client
+            for (int i = 0; i < MAX_CLIENTS; i++) {
+                if (clients[i].active && SDLNet_SocketReady(clients[i].socket)) {
+                    int bytes = SDLNet_TCP_Recv(clients[i].socket, buffer, sizeof(buffer));
+
+                    if (bytes <= 0) {
+                        // Client disconnected
+                        Debug_Info("Client %d disconnected", i);
+                        SDLNet_TCP_DelSocket(server->socket_set, clients[i].socket);
+                        SDLNet_TCP_Close(clients[i].socket);
+                        clients[i].active = 0;
+                    }
+                    else {
+                        // Got data, but the other client is not ready yet.
+                        if (clients[i].active) {
+                            char *msg = "Other player not ready yet\n\0";
+                            SDLNet_TCP_Send(clients[i].socket, msg, strlen(msg));
+                        }
+                    }
+                }
             }
         }
 
@@ -142,6 +170,13 @@ void Server_Loop(Server *server) {
                         }
                     }
                 }
+            }
+
+            if (!clients[0].active || !clients[1].active) {
+                char *msg = "Other player disconnected, finalizing game\n\0";
+                Server_Broadcast(server, msg, strlen(msg));
+                Debug_Info(msg);
+                break;
             }
         }
     }

@@ -1,3 +1,5 @@
+#include "SDL2/SDL_net.h"
+
 #include "client.h"
 #include "client_init.h"
 
@@ -8,6 +10,9 @@
 #include "../shared/logic/terrain.h"
 #include "../shared/logic/projectile.h"
 #include "../shared/logic/input.h"
+
+#define SERVER_IP "127.0.0.2"
+#define SERVER_PORT 5555
 
 int main() {
     Debug_StartTimer();
@@ -46,6 +51,18 @@ int main() {
 }
 
 void Client_Init(Game *game) {
+    IPaddress ip;
+    if (SDLNet_ResolveHost(&ip, SERVER_IP, SERVER_PORT)) {
+        Debug_Error("SDLNet_ResolveHost failed: %s", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    game->server_socket = SDLNet_TCP_Open(&ip);
+    if (!game->server_socket) {
+        Debug_Error("SDLNet_TCP_Open failed: %s", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
     game->window = NULL;
     game->renderer = NULL;
 
@@ -127,6 +144,7 @@ void Client_Render(Game *game) {
 }
 
 void Client_Clean(Game *game) {
+    SDLNet_TCP_Close(game->server_socket);
     for (int i = 0; i < 2; i++) {
         Player_Clean(&game->players[i]);
     }
