@@ -132,8 +132,8 @@ void Debug_StartTimer(void) {
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&count);
     // Store in a static or thread-local variable
-    static double last_time = 0;
-    last_time = (double)count.QuadPart / freq.QuadPart;
+    //static double last_time = 0;
+    //last_time = (double)count.QuadPart / freq.QuadPart;
 #else
     // Unix implementation
     struct timeval tv;

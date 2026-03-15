@@ -1,5 +1,6 @@
 #include <SDL2/SDL_net.h>
 
+#include "../shared/common/common.h"
 #include "../shared/common/debug.h"
 #include "../shared/net/net_utils.h"
 #include "../shared/net/net_protocol.h"
@@ -177,7 +178,9 @@ void Server_Clean(Server *server) {
     SDLNet_Quit();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    UNUSED(argc);
+    UNUSED(argv);
     Server server;
     Server_Init(&server);
     Server_AcceptClients(&server);

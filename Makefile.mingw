@@ -1,0 +1,67 @@
+# Makefile.mingw
+CC = x86_64-w64-mingw32-gcc
+CFLAGS = -Wall -Wextra -std=c99 -g -static -D_REENTRANT -I/usr/x86_64-w64-mingw32/include/SDL2/ -mwindows
+LDFLAGS = -L/usr/x86_64-w64-mingw32/lib \
+          -static \
+          -lmingw32 \
+          -lSDL2main \
+          -lSDL2 \
+          -lSDL2_image \
+          -lSDL2_gfx \
+          -lSDL2_net \
+          -lm \
+          -lws2_32 \
+          -liphlpapi \
+          -lsetupapi \
+          -lwinmm \
+          -lgdi32 \
+          -ldxguid \
+          -ldinput8 \
+          -limm32 \
+          -lole32 \
+          -loleaut32 \
+          -lcomctl32 \
+          -lshell32 \
+          -luuid \
+          -lversion \
+          -lcfgmgr32 \
+          -lshlwapi \
+          -lcomdlg32 \
+          -lhid
+
+SRC_DIRS := ./src
+BUILD_DIR := ./build-windows
+
+CLIENT_TARGET := client.exe
+SERVER_TARGET := server.exe
+
+SRCS_SHARED := $(shell find $(SRC_DIRS)/shared -name '*.c')
+SRCS_CLIENT := $(shell find $(SRC_DIRS)/client -name '*.c')
+SRCS_SERVER := $(shell find $(SRC_DIRS)/server -name '*.c')
+
+OBJS_SHARED := $(SRCS_SHARED:./%.c=$(BUILD_DIR)/%.o)
+OBJS_CLIENT := $(SRCS_CLIENT:./%.c=$(BUILD_DIR)/%.o)
+OBJS_SERVER := $(SRCS_SERVER:./%.c=$(BUILD_DIR)/%.o)
+
+DEPS := $(OBJS_SHARED:.o=.d) $(OBJS_CLIENT:.o=.d) $(OBJS_SERVER:.o=.d)
+
+CPPFLAGS := -MMD -MP
+
+all: $(CLIENT_TARGET) $(SERVER_TARGET)
+
+$(CLIENT_TARGET): $(OBJS_CLIENT) $(OBJS_SHARED)
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+$(SERVER_TARGET): $(OBJS_SERVER) $(OBJS_SHARED)
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(BUILD_DIR) $(CLIENT_TARGET) $(SERVER_TARGET)
+
+-include $(DEPS)
+
+.PHONY: all clean

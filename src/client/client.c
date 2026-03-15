@@ -17,7 +17,9 @@
 #define SERVER_IP "192.168.15.11"
 #define SERVER_PORT 5555
 
-int main() {
+int main(int argc, char *argv[]) {
+    UNUSED(argc);
+    UNUSED(argv);
     Debug_StartTimer();
 
     Game game;
@@ -51,6 +53,12 @@ int main() {
 }
 
 void Client_Init(Game *game) {
+    // Create socket
+    if (SDLNet_Init() < 0) {
+        Debug_Error("SDLNet_Init failed: %s", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, SERVER_IP, SERVER_PORT)) {
         Debug_Error("SDLNet_ResolveHost failed: %s", SDLNet_GetError());
@@ -97,7 +105,7 @@ void Client_Init(Game *game) {
     }
 
     game->window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                 game->w, game->h, SDL_WINDOW_RESIZABLE);
+                                 1440, 900, SDL_WINDOW_RESIZABLE);
     if (!game->window) {
         Debug_Error("Error creating SDL windows: %s", SDL_GetError());
         Client_Clean(game, EXIT_FAILURE);
@@ -176,6 +184,7 @@ void Client_Clean(Game *game, int exit_code) {
     Terrain_Clean(&game->terrain);
     if (game->renderer) SDL_DestroyRenderer(game->renderer);
     if (game->window) SDL_DestroyWindow(game->window);
+    SDLNet_Quit();
     Debug_Info("Game cleaned successfully!");
     SDL_Quit();
     exit(exit_code);

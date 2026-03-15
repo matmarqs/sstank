@@ -2,7 +2,7 @@
 #include "../common/common.h"
 #include "../common/debug.h"
 
-static void NetProtocol_SendPacket(TCPsocket socket_to_send, PacketID packet_id, void *data, int len_data, char *debug_string) {
+static void NetProtocol_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data, char *debug_string) {
     char buffer[sizeof(PacketID) + len_data];
     int offset = 0;
     buffer[offset] = packet_id;
@@ -17,7 +17,7 @@ static void NetProtocol_SendPacket(TCPsocket socket_to_send, PacketID packet_id,
     Debug_HexDump(buffer, size_to_send, debug_string);
 }
 
-void NetProtocol_SendPacketToClient(Client *client, PacketID packet_id, void *data, int len_data) {
+void NetProtocol_SendPacketToClient(Client *client, uint8_t packet_id, void *data, int len_data) {
     if (client->active) {
         char debug_string[100];
         snprintf(debug_string, sizeof(debug_string), "Sent data to client %d", client->id);
@@ -25,6 +25,6 @@ void NetProtocol_SendPacketToClient(Client *client, PacketID packet_id, void *da
     }
 }
 
-void NetProtocol_SendPacketToServer(TCPsocket socket_to_send, PacketID packet_id, void *data, int len_data) {
+void NetProtocol_SendPacketToServer(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data) {
     NetProtocol_SendPacket(socket_to_send, packet_id, data, len_data, "Sent data to server");
 }

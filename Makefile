@@ -8,10 +8,7 @@ SRC_DIRS := ./src
 BUILD_DIR := ./build
 
 CLIENT_TARGET := client.elf
-CLIENT_OBJ := $(BUILD_DIR)/src/client/client.o
-
 SERVER_TARGET := server.elf
-SERVER_OBJ := $(BUILD_DIR)/src/server/server.o
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.
@@ -51,7 +48,7 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(CLIENT_TARGET) $(SERVER_TARGET)
 
 .PHONY: all clean
 
