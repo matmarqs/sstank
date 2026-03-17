@@ -6,7 +6,7 @@
 #include "../shared/common/config.h"
 #include "../shared/struct/st_game.h"
 
-void Client_Init(Game *game);
+void Client_Init(Game *game, char *ip_addr);
 SDL_Texture *Client_LoadImage(Game *game, char *img_path);
 void Client_Load(Game *game);
 int Client_Update(Game *game);

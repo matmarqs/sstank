@@ -14,18 +14,21 @@
 #include "cnet.h"
 #include <stdlib.h>
 
-#define SERVER_IP "192.168.15.11"
 #define SERVER_PORT 5555
 
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        Debug_Info("Usage: ./client.elf SERVER_IP");
+        return EXIT_FAILURE;
+    }
+
     UNUSED(argc);
-    UNUSED(argv);
     Debug_StartTimer();
 
     Game game;
 
     /* Loading the game */
-    Client_Init(&game);
+    Client_Init(&game, argv[1]);
     Terrain_Init(&game.terrain, game.renderer);
     Terrain_LoadFromPNG(&game.terrain, game.renderer,
                         "assets/img/maptest_background.png",
@@ -52,7 +55,7 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 }
 
-void Client_Init(Game *game) {
+void Client_Init(Game *game, char *ip_addr) {
     // Create socket
     if (SDLNet_Init() < 0) {
         Debug_Error("SDLNet_Init failed: %s", SDLNet_GetError());
@@ -60,7 +63,7 @@ void Client_Init(Game *game) {
     }
 
     IPaddress ip;
-    if (SDLNet_ResolveHost(&ip, SERVER_IP, SERVER_PORT)) {
+    if (SDLNet_ResolveHost(&ip, ip_addr, SERVER_PORT)) {
         Debug_Error("SDLNet_ResolveHost failed: %s", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
@@ -111,7 +114,11 @@ void Client_Init(Game *game) {
         Client_Clean(game, EXIT_FAILURE);
     }
 
-    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
+    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+#ifdef _WIN32
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+#endif
     if (!game->renderer) {
         Debug_Error("Error creating SDL renderer: %s", SDL_GetError());
         Client_Clean(game, EXIT_FAILURE);
