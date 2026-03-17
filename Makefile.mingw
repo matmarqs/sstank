@@ -1,33 +1,6 @@
 # Makefile.mingw
-CC = x86_64-w64-mingw32-gcc
-CFLAGS = -Wall -Wextra -std=c99 -g -static -D_REENTRANT -I/usr/x86_64-w64-mingw32/include/SDL2/ -mwindows
-LDFLAGS = -L/usr/x86_64-w64-mingw32/lib \
-          -static \
-          -lmingw32 \
-          -lSDL2main \
-          -lSDL2 \
-          -lSDL2_image \
-          -lSDL2_gfx \
-          -lSDL2_net \
-          -lm \
-          -lws2_32 \
-          -liphlpapi \
-          -lsetupapi \
-          -lwinmm \
-          -lgdi32 \
-          -ldxguid \
-          -ldinput8 \
-          -limm32 \
-          -lole32 \
-          -loleaut32 \
-          -lcomctl32 \
-          -lshell32 \
-          -luuid \
-          -lversion \
-          -lcfgmgr32 \
-          -lshlwapi \
-          -lcomdlg32 \
-          -lhid
+CFLAGS = -Wall -Wextra -std=c99 -g -static $(shell pkg-config --cflags --static sdl2 SDL2_image SDL2_gfx SDL2_net)
+LDFLAGS = -static $(shell pkg-config --libs --static sdl2 SDL2_image SDL2_gfx SDL2_net)
 
 SRC_DIRS := ./src
 BUILD_DIR := ./build-windows

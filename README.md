@@ -10,3 +10,10 @@ This is only to make the game look pretty while still in development.
 The assets were mainly stolen from DDTank and Super Smash Flash (both Flash games). Others were just found in the internet or drawn by my girlfriend.
 
 If you are curious, you can use `https://github.com/jindrapetrik/jpexs-decompiler` to dissect any Shockwave Flash game.
+
+## compiling for Windows
+
+Use this awesome project <https://github.com/HolyBlackCat/quasi-msys2> and:
+```bash
+make -f Makefile.mingw
+```
