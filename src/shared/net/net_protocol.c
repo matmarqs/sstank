@@ -3,10 +3,10 @@
 #include "../common/debug.h"
 
 static void NetProtocol_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data, char *debug_string) {
-    char buffer[sizeof(PacketID) + len_data];
+    char buffer[sizeof(uint8_t) + len_data];
     int offset = 0;
     buffer[offset] = packet_id;
-    offset += sizeof(PacketID);
+    offset += sizeof(uint8_t);
     int size_to_send = offset;
     if (data && len_data > 0) {
         int size_to_copy = MIN((int) (sizeof(buffer) - offset), len_data);

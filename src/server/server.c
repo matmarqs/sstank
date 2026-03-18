@@ -53,7 +53,7 @@ void Server_Init(Server *server) {
     Debug_Info("Server listening on IP %s port %d", ip_char, PORT);
 }
 
-void Server_Broadcast(Server *server, PacketID packet_id, void *data, int len) {
+void Server_Broadcast(Server *server, uint8_t packet_id, void *data, int len) {
     Client *clients = server->clients;
     for (int i = 0; i < MAX_CLIENTS; i++) {
         NetProtocol_SendPacketToClient(&clients[i], packet_id, data, len);
@@ -86,11 +86,11 @@ void Server_AcceptClients(Server *server) {
                 Debug_Info("Client %d connected", slot);
 
                 // Send welcome with ID
-                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SERVER_WELCOME_YOUR_ID, &slot, 4);
+                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SV_WELCOME, &slot, 4);
             }
             else {
                 // Server full
-                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SERVER_IS_FULL, NULL, 0);
+                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SV_FULL, NULL, 0);
                 SDLNet_TCP_Close(client_socket);
             }
         }
@@ -112,14 +112,14 @@ void Server_AcceptClients(Server *server) {
                     }
                     else {
                         // Got data, but the other client is not ready yet.
-                        NetProtocol_SendPacketToClient(&clients[i], PACKET_SERVER_WAIT_OTHER_PLAYER, NULL, 0);
+                        NetProtocol_SendPacketToClient(&clients[i], PACKET_SV_WAITING, NULL, 0);
                     }
                 }
             }
         }
 
         if (clients[0].active && clients[1].active) {
-            Server_Broadcast(server, PACKET_SERVER_GAME_START, NULL, 0);
+            Server_Broadcast(server, PACKET_SV_START, NULL, 0);
             Debug_Info("Both clients connected! Starting game!");
             break;
         }
@@ -150,16 +150,28 @@ void Server_Loop(Server *server) {
                         clients[i].active = 0;
                     }
                     else {
-                        // Got data! Forward to other client
                         // HERE WE PROCESS CLIENT INPUT
-                        int other = (i == 0) ? 1 : 0;
-                        NetProtocol_SendPacketToClient(&clients[other], PACKET_CLIENT_INPUT, buffer+1, bytes-1);
+                        uint8_t packet_id = *(uint8_t *)buffer;
+                        if (packet_id == PACKET_CL_MESSAGE) {
+                            ClientMessage cl_msg = *(ClientMessage *)(buffer + 1);
+                            uint8_t packet_type = cl_msg.type;
+                            switch (packet_type) {
+                                case CLMSG_PLAYER_INPUT:
+                                    break;
+                                case CLMSG_PLAYER_THROW:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        ServerMessage sv_msg;
+                        NetProtocol_SendPacketToClient(&clients[i], PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
                     }
                 }
             }
 
             if (!clients[0].active || !clients[1].active) {
-                Server_Broadcast(server, PACKET_SERVER_OTHER_PLAYER_DISCONNECTED, NULL, 0);
+                Server_Broadcast(server, PACKET_SV_DISCONNECT, NULL, 0);
                 Debug_Info("Some player disconnected. Ending game!");
                 break;
             }

@@ -5,35 +5,46 @@
 #include <SDL2/SDL_net.h>
 
 enum {
-    PACKET_SERVER_WELCOME_YOUR_ID,
-    PACKET_SERVER_IS_FULL,
-    PACKET_SERVER_WAIT_OTHER_PLAYER,
-    PACKET_SERVER_GAME_START,
-    PACKET_SERVER_OTHER_PLAYER_DISCONNECTED,
-    PACKET_CLIENT_INPUT,
-    PACKET_SERVER_MESSAGE,
-    PACKET_MAX_FAKEPACKET,
+    PACKET_SV_WELCOME,
+    PACKET_SV_FULL,
+    PACKET_SV_WAITING,
+    PACKET_SV_START,
+    PACKET_SV_DISCONNECT,
+    PACKET_SV_MESSAGE,
+    PACKET_CL_MESSAGE,
+    PACKET_FAKE_MAX,
 };
-typedef uint8_t PacketID;
 
 enum {
-    UPDATE_PLAYER_POS,
-    UPDATE_PLAYER_HEALTH,
-    UPDATE_PROJECTILE_NEW,
-    UPDATE_TERRAIN_DESTROY,
+    SVMSG_PLAYER_POS,
+    SVMSG_PLAYER_HEALTH,
+    SVMSG_PROJECTILE_NEW,
+    SVMSG_TERRAIN_DESTROY,
 };
-typedef uint8_t MessageType;
 
 typedef struct {
-    MessageType type;
+    uint8_t type;
     uint32_t sequence;
     union {
         struct { uint8_t id; float x; float y; } player_pos;
         struct { uint8_t id; float health; } player_health;
-        struct { uint8_t id; float x, y; float angle, power; float type; } projectile_new;
+        struct { uint8_t id; float x, y, angle, power; int type; } projectile_new;
         struct { float x, y; float radius; } terrain_destroy;
     } data;
-} UpdatePacket;
+} ServerMessage;
+
+enum {
+    CLMSG_PLAYER_INPUT,
+    CLMSG_PLAYER_THROW,
+};
+
+typedef struct {
+    uint8_t type;
+    union {
+        struct { uint8_t left, right; } player_input;
+        struct { float angle, power; int type; } projectile_throw;
+    } data;
+} ClientMessage;
 
 typedef struct {
     TCPsocket socket;
