@@ -11,10 +11,29 @@ enum {
     PACKET_SERVER_GAME_START,
     PACKET_SERVER_OTHER_PLAYER_DISCONNECTED,
     PACKET_CLIENT_INPUT,
+    PACKET_SERVER_MESSAGE,
     PACKET_MAX_FAKEPACKET,
 };
-
 typedef uint8_t PacketID;
+
+enum {
+    UPDATE_PLAYER_POS,
+    UPDATE_PLAYER_HEALTH,
+    UPDATE_PROJECTILE_NEW,
+    UPDATE_TERRAIN_DESTROY,
+};
+typedef uint8_t MessageType;
+
+typedef struct {
+    MessageType type;
+    uint32_t sequence;
+    union {
+        struct { uint8_t id; float x; float y; } player_pos;
+        struct { uint8_t id; float health; } player_health;
+        struct { uint8_t id; float x, y; float angle, power; float type; } projectile_new;
+        struct { float x, y; float radius; } terrain_destroy;
+    } data;
+} UpdatePacket;
 
 typedef struct {
     TCPsocket socket;

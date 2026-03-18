@@ -151,6 +151,7 @@ void Server_Loop(Server *server) {
                     }
                     else {
                         // Got data! Forward to other client
+                        // HERE WE PROCESS CLIENT INPUT
                         int other = (i == 0) ? 1 : 0;
                         NetProtocol_SendPacketToClient(&clients[other], PACKET_CLIENT_INPUT, buffer+1, bytes-1);
                     }

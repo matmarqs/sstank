@@ -1,6 +1,8 @@
 #include "../shared/net/net_protocol.h"
 #include "../shared/struct/st_game.h"
 #include "../shared/common/common.h"
+#include "../shared/logic/projectile.h"
+#include "../shared/logic/terrain.h"
 #include "cnet.h"
 #include <SDL2/SDL_net.h>
 
@@ -51,6 +53,36 @@ static int CNet_Handler_PACKET_CLIENT_INPUT(Game *game, void *data, int len_data
     return 0;
 }
 
+static int CNet_Handler_PACKET_SERVER_MESSAGE(Game *game, void *data, int len_data) {
+    UNUSED(len_data);
+    int offset = sizeof(PacketID);
+    UpdatePacket packet = *(UpdatePacket *)(data + offset);
+    uint8_t type = packet.type;
+    switch (type) {
+        case UPDATE_PLAYER_POS:
+            game->players[packet.data.player_pos.id].x = packet.data.player_pos.x;
+            game->players[packet.data.player_pos.id].y = packet.data.player_pos.y;
+            break;
+        case UPDATE_PLAYER_HEALTH:
+            game->players[packet.data.player_pos.id].health = packet.data.player_health.health;
+            break;
+        case UPDATE_PROJECTILE_NEW:
+            Projectile_Throw(&game->projectile_sys, packet.data.projectile_new.type,
+                             packet.data.projectile_new.x, packet.data.projectile_new.y,
+                             packet.data.projectile_new.angle, packet.data.projectile_new.power,
+                             packet.data.projectile_new.id);
+            break;
+        case UPDATE_TERRAIN_DESTROY:
+            Terrain_DestroyCircle(&game->terrain,
+                                  packet.data.terrain_destroy.x, packet.data.terrain_destroy.y,
+                                  packet.data.terrain_destroy.radius);
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
 void CNet_InitHandlers() {
     handlers[PACKET_SERVER_WELCOME_YOUR_ID] = CNet_Handler_PACKET_SERVER_WELCOME_YOUR_ID;
     handlers[PACKET_SERVER_IS_FULL] = CNet_Handler_PACKET_SERVER_IS_FULL;
@@ -58,6 +90,7 @@ void CNet_InitHandlers() {
     handlers[PACKET_SERVER_GAME_START] = CNet_Handler_PACKET_SERVER_GAME_START;
     handlers[PACKET_SERVER_OTHER_PLAYER_DISCONNECTED] = CNet_Handler_PACKET_SERVER_OTHER_PLAYER_DISCONNECTED;
     handlers[PACKET_CLIENT_INPUT] = CNet_Handler_PACKET_CLIENT_INPUT;
+    handlers[PACKET_SERVER_MESSAGE] = CNet_Handler_PACKET_SERVER_MESSAGE;
     for (int i = PACKET_MAX_FAKEPACKET; i < 256; i++) {
         handlers[i] = CNet_Handler_NOOP;
     }

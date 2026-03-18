@@ -114,11 +114,7 @@ void Client_Init(Game *game, char *ip_addr) {
         Client_Clean(game, EXIT_FAILURE);
     }
 
-    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-#ifdef _WIN32
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d");
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-#endif
+    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
     if (!game->renderer) {
         Debug_Error("Error creating SDL renderer: %s", SDL_GetError());
         Client_Clean(game, EXIT_FAILURE);
