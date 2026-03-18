@@ -10,7 +10,7 @@
 
 #define NUM_PLAYERS 2
 
-typedef struct Game {
+typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
 
