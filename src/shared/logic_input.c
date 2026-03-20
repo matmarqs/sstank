@@ -1,6 +1,6 @@
-#include "../common/common.h"
+#include "base_common.h"
 
-#include "input.h"
+#include "logic_input.h"
 
 void Input_InitKeys(Input *input) {
     input->w = input->a = input->s = input->d = input->space = input->l_shift = FALSE;

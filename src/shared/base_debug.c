@@ -1,4 +1,4 @@
-#include "debug.h"
+#include "base_debug.h"
 
 static FILE *debug_log_file = NULL;
 static int debug_use_colors = 1;  // Set to 0 if outputting to file
@@ -7,7 +7,7 @@ void Debug_Init(FILE *log_file) {
     debug_log_file = log_file;
 }
 
-static void debug_print(const char *level_color, const char *level_str, 
+static void debug_print(const char *level_color, const char *level_str,
                         const char *format, va_list args) {
     FILE *output = debug_log_file ? debug_log_file : stdout;
 
@@ -132,14 +132,14 @@ void Debug_StartTimer(void) {
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&count);
     // Store in a static or thread-local variable
-    //static double last_time = 0;
-    //last_time = (double)count.QuadPart / freq.QuadPart;
+    //static double lastruct_time = 0;
+    //lastruct_time = (double)count.QuadPart / freq.QuadPart;
 #else
     // Unix implementation
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    //static double last_time = 0;
-    //last_time = tv.tv_sec + tv.tv_usec / 1000000.0;
+    //static double lastruct_time = 0;
+    //lastruct_time = tv.tv_sec + tv.tv_usec / 1000000.0;
 #endif
 }
 
@@ -155,9 +155,9 @@ double Debug_EndTimer(const char *label) {
     double current_time = tv.tv_sec + tv.tv_usec / 1000000.0;
 #endif
 
-    static double last_time = 0;
-    double elapsed = current_time - last_time;
-    last_time = current_time;
+    static double lastruct_time = 0;
+    double elapsed = current_time - lastruct_time;
+    lastruct_time = current_time;
 
 #if DEBUG_LEVEL >= DEBUG_INFO
     if (label) {

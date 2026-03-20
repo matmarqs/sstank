@@ -1,8 +1,8 @@
-#ifndef _GAME_INIT_H
-#define _GAME_INIT_H
+#ifndef _CLIENT_INIT_H
+#define _CLIENT_INIT_H
 
-#include "../shared/struct/st_input.h"
-#include "../shared/struct/st_player.h"
+#include "../shared/struct_input.h"
+#include "../shared/struct_player.h"
 
 int ClientInit_MoveLeft_Player1(Input *input);
 int ClientInit_MoveRight_Player1(Input *input);

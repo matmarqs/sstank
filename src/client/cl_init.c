@@ -1,7 +1,7 @@
-#include "client_init.h"
+#include "cl_init.h"
 
-#include "../shared/common/common.h"
-#include "../shared/common/debug.h"
+#include "../shared/base_common.h"
+#include "../shared/base_debug.h"
 
 
 int ClientInit_MoveLeft(Input *input) {

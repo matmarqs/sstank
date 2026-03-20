@@ -1,18 +1,17 @@
 #include "SDL2/SDL_net.h"
 
-#include "client.h"
-#include "client_init.h"
+#include "cl_main.h"
+#include "cl_init.h"
+#include "cl_net.h"
 
-#include "../shared/common/common.h"
-#include "../shared/common/debug.h"
+#include "../shared/base_common.h"
+#include "../shared/base_debug.h"
 
-#include "../shared/logic/player.h"
-#include "../shared/logic/terrain.h"
-#include "../shared/logic/projectile.h"
-#include "../shared/logic/input.h"
-#include "../shared/net/net_utils.h"
-#include "cnet.h"
-#include <stdlib.h>
+#include "../shared/logic_player.h"
+#include "../shared/logic_terrain.h"
+#include "../shared/logic_projectile.h"
+#include "../shared/logic_input.h"
+#include "../shared/net_util.h"
 
 #define SERVER_PORT 5555
 
@@ -31,8 +30,8 @@ int main(int argc, char *argv[]) {
     Client_Init(&game, argv[1]);
     Terrain_Init(&game.terrain, game.renderer);
     Terrain_LoadFromPNG(&game.terrain, game.renderer,
-                        "assets/img/maptest_background.png",
-                        "assets/img/maptest_foreground.png");
+                        "assets/img/maptestruct_background.png",
+                        "assets/img/maptestruct_foreground.png");
     ClientInit_Players(game.players);
 
     Debug_Info("Game initialized successfully!");
@@ -83,13 +82,13 @@ void Client_Init(Game *game, char *ip_addr) {
     NetUtil_IPint32ToChar(ip.host, ip_char);
     Debug_Info("Connected to server with IP %s port %d", ip_char, ip.port);
 
-    CNet_InitHandlers();
+    ClientNet_InitHandlers();
 
     game->my_player_id = -1;
     game->start = 0;
 
     while (game->my_player_id == -1 || !game->start) {
-        int quit = CNet_RecvFromServer(game, 60);
+        int quit = ClientNet_RecvFromServer(game, 60);
         if (quit) {
             Client_Clean(game, EXIT_FAILURE);
         }
@@ -147,9 +146,9 @@ int Client_Update(Game *game) {
     int quit_local = Input_SetEvents(&game->event, &game->input);
     memcpy(&game->players[game->my_player_id].input, &game->input, sizeof(Input));
 
-    CNet_SendInputToServer(game);
+    ClientNet_SendInputToServer(game);
 
-    int quit_net = CNet_RecvFromServer(game, 0);
+    int quit_net = ClientNet_RecvFromServer(game, 0);
 
     for (int i = 0; i < 2; i++) {
         Player_Update(&game->players[i], game);

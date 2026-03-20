@@ -1,9 +1,9 @@
-#ifndef _PLAYER_H
-#define _PLAYER_H
+#ifndef _LOGIC_PLAYER_H
+#define _LOGIC_PLAYER_H
 
 #include <SDL2/SDL.h>
-#include "../struct/st_player.h"
-#include "../struct/st_game.h"
+#include "struct_player.h"
+#include "struct_game.h"
 
 #define SPEED 300   /* speed in pixels/sec */
 #define BASE_PLAYER_HEIGHT 60

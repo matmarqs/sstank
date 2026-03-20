@@ -1,9 +1,9 @@
 #include <SDL2/SDL_net.h>
 
-#include "../shared/common/common.h"
-#include "../shared/common/debug.h"
-#include "../shared/net/net_utils.h"
-#include "../shared/net/net_protocol.h"
+#include "../shared/base_common.h"
+#include "../shared/base_debug.h"
+#include "../shared/net_util.h"
+#include "../shared/net_protocol.h"
 
 #define PORT 5555
 #define MAX_CLIENTS 2

@@ -1,35 +1,36 @@
-#include "../shared/net/net_protocol.h"
-#include "../shared/struct/st_game.h"
-#include "../shared/common/common.h"
-#include "../shared/logic/projectile.h"
-#include "../shared/logic/terrain.h"
-#include "cnet.h"
+#include "cl_net.h"
+
+#include "../shared/net_protocol.h"
+#include "../shared/struct_game.h"
+#include "../shared/base_common.h"
+#include "../shared/logic_projectile.h"
+#include "../shared/logic_terrain.h"
 #include <SDL2/SDL_net.h>
 
-static CNet_Handler handlers[256];
+static ClientNet_Handler handlers[256];
 
-static int CNet_Handler_PACKET_SV_WELCOME(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_WELCOME(Game *game, void *data, int len_data) {
     UNUSED(len_data);
     int offset = sizeof(uint8_t);
     game->my_player_id = *(int *)(data + offset);
     return 0;
 }
 
-static int CNet_Handler_PACKET_SV_FULL(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_FULL(Game *game, void *data, int len_data) {
     UNUSED(game);
     UNUSED(data);
     UNUSED(len_data);
     return 1;
 }
 
-static int CNet_Handler_NOOP(Game *game, void *data, int len_data) {
+static int ClientNet_H_NOOP(Game *game, void *data, int len_data) {
     UNUSED(game);
     UNUSED(data);
     UNUSED(len_data);
     return 0;
 }
 
-static int CNet_Handler_PACKET_SV_START(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_START(Game *game, void *data, int len_data) {
     UNUSED(game);
     UNUSED(data);
     UNUSED(len_data);
@@ -37,23 +38,14 @@ static int CNet_Handler_PACKET_SV_START(Game *game, void *data, int len_data) {
     return 0;
 }
 
-static int CNet_Handler_PACKET_SV_DISCONNECT(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_DISCONNECT(Game *game, void *data, int len_data) {
     UNUSED(game);
     UNUSED(data);
     UNUSED(len_data);
     return 1;   // return 1 in order to quit
 }
 
-static int CNet_Handler_PACKET_SV_MESSAGE(Game *game, void *data, int len_data) {
-    UNUSED(len_data);
-    int offset = sizeof(uint8_t);
-    int player_id = *(int *)(data + offset);
-    offset += 4;
-    memcpy(&game->players[player_id].input, data + offset, sizeof(Input));
-    return 0;
-}
-
-static int CNet_Handler_PACKET_SERVER_MESSAGE(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_MESSAGE(Game *game, void *data, int len_data) {
     UNUSED(len_data);
     int offset = sizeof(uint8_t);
     ServerMessage packet = *(ServerMessage *)(data + offset);
@@ -83,20 +75,20 @@ static int CNet_Handler_PACKET_SERVER_MESSAGE(Game *game, void *data, int len_da
     return 0;
 }
 
-void CNet_InitHandlers() {
-    handlers[PACKET_SV_WELCOME] = CNet_Handler_PACKET_SV_WELCOME;
-    handlers[PACKET_SV_FULL] = CNet_Handler_PACKET_SV_FULL;
-    handlers[PACKET_SV_WAITING] = CNet_Handler_NOOP;
-    handlers[PACKET_SV_START] = CNet_Handler_PACKET_SV_START;
-    handlers[PACKET_SV_DISCONNECT] = CNet_Handler_PACKET_SV_DISCONNECT;
-    handlers[PACKET_SV_MESSAGE] = CNet_Handler_PACKET_SV_MESSAGE;
-    handlers[PACKET_CL_MESSAGE] = CNet_Handler_NOOP;
+void ClientNet_InitHandlers() {
+    handlers[PACKET_SV_WELCOME] = ClientNet_H_PACKET_SV_WELCOME;
+    handlers[PACKET_SV_FULL] = ClientNet_H_PACKET_SV_FULL;
+    handlers[PACKET_SV_WAITING] = ClientNet_H_NOOP;
+    handlers[PACKET_SV_START] = ClientNet_H_PACKET_SV_START;
+    handlers[PACKET_SV_DISCONNECT] = ClientNet_H_PACKET_SV_DISCONNECT;
+    handlers[PACKET_SV_MESSAGE] = ClientNet_H_PACKET_SV_MESSAGE;
+    handlers[PACKET_CL_MESSAGE] = ClientNet_H_NOOP;
     for (int i = PACKET_FAKE_MAX; i < 256; i++) {
-        handlers[i] = CNet_Handler_NOOP;
+        handlers[i] = ClientNet_H_NOOP;
     }
 }
 
-int CNet_RecvFromServer(Game *game, int timeout) {
+int ClientNet_RecvFromServer(Game *game, int timeout) {
     int active_socket = SDLNet_CheckSockets(game->server_socket_set, timeout);
     if (active_socket) {
         char buffer[4096];
@@ -108,7 +100,7 @@ int CNet_RecvFromServer(Game *game, int timeout) {
     return 0;
 }
 
-void CNet_SendInputToServer(Game *game) {
+void ClientNet_SendInputToServer(Game *game) {
     char data[1024];
     int len_data = 0;
     *(int *)data = game->my_player_id;

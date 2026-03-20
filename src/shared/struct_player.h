@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "st_input_mapper.h"
+#include "struct_input_mapper.h"
 
 #define NUM_SPRITES 12
 

@@ -4,9 +4,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_net.h>
 
-#include "st_player.h"
-#include "st_projectile.h"
-#include "st_terrain.h"
+#include "struct_player.h"
+#include "struct_projectile.h"
+#include "struct_terrain.h"
 
 #define NUM_PLAYERS 2
 

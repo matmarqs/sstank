@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _BASE_COMMON_H
+#define _BASE_COMMON_H
 
 #define CONST_PI 3.14159265
 

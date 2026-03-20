@@ -3,12 +3,12 @@
 #include <SDL2/SDL2_gfxPrimitives.h> // filledCircleRGBA
 #include <math.h> // sin, cos
 
-#include "../common/common.h"
-#include "../common/debug.h"
+#include "base_common.h"
+#include "base_debug.h"
 
-#include "projectile.h"
-#include "terrain.h" // Terrain_CheckCollision
-#include "player.h" // Player_Teleport
+#include "logic_projectile.h"
+#include "logic_terrain.h" // Terrain_CheckCollision
+#include "logic_player.h" // Player_Teleport
 
 
 int Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer) {
@@ -65,15 +65,15 @@ int CircleRectCollision(float circle_x, float circle_y, float radius,
                         float rect_x, float rect_y, float rect_w, float rect_h) {
 
     // Find closest point on rectangle to circle
-    float closest_x = fmax(rect_x, fmin(circle_x, rect_x + rect_w));
-    float closest_y = fmax(rect_y, fmin(circle_y, rect_y + rect_h));
+    float closestruct_x = fmax(rect_x, fmin(circle_x, rect_x + rect_w));
+    float closestruct_y = fmax(rect_y, fmin(circle_y, rect_y + rect_h));
 
     // Calculate distance from circle center to this closest point
-    float dx = circle_x - closest_x;
-    float dy = circle_y - closest_y;
-    float dist_sq = dx*dx + dy*dy;
+    float dx = circle_x - closestruct_x;
+    float dy = circle_y - closestruct_y;
+    float distruct_sq = dx*dx + dy*dy;
 
-    return dist_sq <= radius * radius;
+    return distruct_sq <= radius * radius;
 }
 
 void Projectile_Update(ProjectileSystem *ps, Game *game) {

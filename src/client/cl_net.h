@@ -1,13 +1,13 @@
-#ifndef _CNET_H
-#define _CNET_H
+#ifndef _CLIENT_NET_H
+#define _CLIENT_NET_H
 
-#include "../shared/struct/st_game.h"
+#include "../shared/struct_game.h"
 
-// a CNet_Handler is pointer to a function f with type: void f(Game, data, len)
-typedef int (*CNet_Handler)(Game *, void *, int);
+// a ClientNet_Handler is pointer to a function f with type: void f(Game, data, len)
+typedef int (*ClientNet_Handler)(Game *, void *, int);
 
-void CNet_InitHandlers();
-int CNet_RecvFromServer(Game *game, int timeout);
-void CNet_SendInputToServer(Game *game);
+void ClientNet_InitHandlers();
+int ClientNet_RecvFromServer(Game *game, int timeout);
+void ClientNet_SendInputToServer(Game *game);
 
 #endif

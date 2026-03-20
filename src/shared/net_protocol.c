@@ -1,6 +1,6 @@
 #include "net_protocol.h"
-#include "../common/common.h"
-#include "../common/debug.h"
+#include "base_common.h"
+#include "base_debug.h"
 
 static void NetProtocol_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data, char *debug_string) {
     char buffer[sizeof(uint8_t) + len_data];

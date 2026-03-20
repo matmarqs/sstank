@@ -1,14 +1,14 @@
 #include <SDL2/SDL_image.h> // IMG_LoadTexture
 #include <SDL2/SDL2_gfxPrimitives.h> // boxRGBA
 
-#include "../common/common.h"
-#include "../common/debug.h"
-#include "../common/config.h" // WORLD_WIDTH, WORLD_HEIGHT
+#include "base_common.h"
+#include "base_debug.h"
+#include "base_config.h" // WORLD_WIDTH, WORLD_HEIGHT
 
-#include "player.h" // already includes "struct Game"
-#include "movement.h" // Movement_DeterminePlayerState
-#include "projectile.h" // Projectile_Throw
-#include "input.h"
+#include "logic_player.h" // already includes "struct Game"
+#include "logic_movement.h" // Movement_DeterminePlayerState
+#include "logic_projectile.h" // Projectile_Throw
+#include "logic_input.h"
 
 int loop_integer(int i, int n) {
     int period = 2 * (n - 1);  // For n=6, period = 10

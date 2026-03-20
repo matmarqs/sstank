@@ -1,10 +1,10 @@
-#ifndef _GAME_H
-#define _GAME_H
+#ifndef _CLIENT_MAIN_H
+#define _CLIENT_MAIN_H
 
 #include <SDL2/SDL.h>
 
-#include "../shared/common/config.h"
-#include "../shared/struct/st_game.h"
+#include "../shared/base_config.h"
+#include "../shared/struct_game.h"
 
 void Client_Init(Game *game, char *ip_addr);
 SDL_Texture *Client_LoadImage(Game *game, char *img_path);

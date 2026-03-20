@@ -1,10 +1,10 @@
-#ifndef _TERRAIN_H
-#define _TERRAIN_H
+#ifndef _LOGIC_TERRAIN_H
+#define _LOGIC_TERRAIN_H
 
 #include <SDL2/SDL.h>
 
-#include "../struct/st_terrain.h"
-#include "../common/config.h"
+#include "struct_terrain.h"
+#include "base_config.h"
 
 #define TERRAIN_WIDTH  WORLD_WIDTH
 #define TERRAIN_HEIGHT WORLD_HEIGHT

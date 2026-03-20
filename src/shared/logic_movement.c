@@ -1,5 +1,5 @@
-#include "movement.h"
-#include "terrain.h" // Terrain_IsSolid, ....
+#include "logic_movement.h"
+#include "logic_terrain.h" // Terrain_IsSolid, ....
 
 // ===== STATE DETERMINATION =====
 PlayerMoveState Movement_DeterminePlayerState(Terrain *terr, Player *p) {
