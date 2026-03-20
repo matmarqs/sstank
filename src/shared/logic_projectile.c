@@ -76,7 +76,7 @@ int CircleRectCollision(float circle_x, float circle_y, float radius,
     return distruct_sq <= radius * radius;
 }
 
-void Projectile_Update(ProjectileSystem *ps, Game *game) {
+void Projectile_Update(ProjectileSystem *ps, GameState *game) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->projectiles[i];
 

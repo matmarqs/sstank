@@ -1,5 +1,5 @@
-#ifndef _LOGIC_MOVEMENT_H
-#define _LOGIC_MOVEMENT_H
+#ifndef _LOGIC_PHYSICS_H
+#define _LOGIC_PHYSICS_H
 
 #include "struct_movement.h"
 #include "struct_player.h"

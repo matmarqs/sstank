@@ -11,7 +11,7 @@
 #define BOMB_RADIUS PROJECTILE_WIDTH
 
 int  Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer);
-void Projectile_Update(ProjectileSystem *ps, Game *game);
+void Projectile_Update(ProjectileSystem *ps, GameState *game);
 void Projectile_Render(ProjectileSystem *ps, SDL_Renderer *renderer);
 void Projectile_Clean(ProjectileSystem *ps);
 

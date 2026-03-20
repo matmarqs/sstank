@@ -11,28 +11,11 @@
 #define NUM_PLAYERS 2
 
 typedef struct {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-
-    SDL_Event event;
-
-    Terrain terrain;
-
-    Input input;
-
-    int my_player_id;
-    int start;
-
-    Player players[NUM_PLAYERS];
-
-    ProjectileSystem projectile_sys;
-
-    int w, h;
-
     int time;
-
-    TCPsocket server_socket;
-    SDLNet_SocketSet server_socket_set;
-} Game;
+    int w, h;
+    Terrain terrain;
+    Player players[NUM_PLAYERS];
+    ProjectileSystem projectile_sys;
+} GameState;
 
 #endif

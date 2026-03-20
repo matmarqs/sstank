@@ -1,7 +1,7 @@
 #ifndef _BASE_CONFIG_H
 #define _BASE_CONFIG_H
 
-#define GAME_TITLE "Projectile Game"
+#define GAME_TITLE "SSTank"
 
 #define WORLD_WIDTH  2880
 #define WORLD_HEIGHT 1800

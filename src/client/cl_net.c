@@ -9,44 +9,45 @@
 
 static ClientNet_Handler handlers[256];
 
-static int ClientNet_H_PACKET_SV_WELCOME(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_WELCOME(ClientState *client, void *data, int len_data) {
     UNUSED(len_data);
     int offset = sizeof(uint8_t);
-    game->my_player_id = *(int *)(data + offset);
+    client->my_player_id = *(int *)(data + offset);
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_FULL(Game *game, void *data, int len_data) {
-    UNUSED(game);
+static int ClientNet_H_PACKET_SV_FULL(ClientState *client, void *data, int len_data) {
+    UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
     return 1;
 }
 
-static int ClientNet_H_NOOP(Game *game, void *data, int len_data) {
-    UNUSED(game);
+static int ClientNet_H_NOOP(ClientState *client, void *data, int len_data) {
+    UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_START(Game *game, void *data, int len_data) {
-    UNUSED(game);
+static int ClientNet_H_PACKET_SV_START(ClientState *client, void *data, int len_data) {
+    UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
-    game->start = 1;
+    client->start = 1;
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_DISCONNECT(Game *game, void *data, int len_data) {
-    UNUSED(game);
+static int ClientNet_H_PACKET_SV_DISCONNECT(ClientState *client, void *data, int len_data) {
+    UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
     return 1;   // return 1 in order to quit
 }
 
-static int ClientNet_H_PACKET_SV_MESSAGE(Game *game, void *data, int len_data) {
+static int ClientNet_H_PACKET_SV_MESSAGE(ClientState *client, void *data, int len_data) {
     UNUSED(len_data);
+    GameState *game = &client->game;
     int offset = sizeof(uint8_t);
     ServerMessage packet = *(ServerMessage *)(data + offset);
     uint8_t type = packet.type;
@@ -88,7 +89,7 @@ void ClientNet_InitHandlers() {
     }
 }
 
-int ClientNet_RecvFromServer(Game *game, int timeout) {
+int ClientNet_RecvFromServer(ClientState *game, int timeout) {
     int active_socket = SDLNet_CheckSockets(game->server_socket_set, timeout);
     if (active_socket) {
         char buffer[4096];
@@ -100,12 +101,12 @@ int ClientNet_RecvFromServer(Game *game, int timeout) {
     return 0;
 }
 
-void ClientNet_SendInputToServer(Game *game) {
+void ClientNet_SendInputToServer(ClientState *client) {
     char data[1024];
     int len_data = 0;
-    *(int *)data = game->my_player_id;
+    *(int *)data = client->my_player_id;
     len_data += sizeof(int);
-    memcpy(data + len_data, &game->players[game->my_player_id].input, sizeof(Input));
+    memcpy(data + len_data, &client->game.players[client->my_player_id].input, sizeof(Input));
     len_data += sizeof(Input);
-    NetProtocol_SendPacketToServer(game->server_socket, PACKET_SV_MESSAGE, data, len_data);
+    NetProtocol_SendPacketToServer(client->server_socket, PACKET_SV_MESSAGE, data, len_data);
 }

@@ -5,8 +5,8 @@
 #include "base_debug.h"
 #include "base_config.h" // WORLD_WIDTH, WORLD_HEIGHT
 
-#include "logic_player.h" // already includes "struct Game"
-#include "logic_movement.h" // Movement_DeterminePlayerState
+#include "logic_player.h" // already includes "struct GameState"
+#include "logic_physics.h" // Movement_DeterminePlayerState
 #include "logic_projectile.h" // Projectile_Throw
 #include "logic_input.h"
 
@@ -68,7 +68,7 @@ void Player_Teleport(Player *p, float x, float y) {
     p->vy = 0;
 }
 
-void Player_Update(Player *p, Game *game) {
+void Player_Update(Player *p, GameState *game) {
     p->damage_timer--;
     p->damage_timer = MAX(p->damage_timer, 0);
     if (p->health <= 0) {
@@ -81,7 +81,7 @@ void Player_Update(Player *p, Game *game) {
     }
 }
 
-void Player_ShootingHandler(Player *p, Game *game) {
+void Player_ShootingHandler(Player *p, GameState *game) {
     // 1. Handle aiming (doesn't affect movement)
     if (p->input_mapper.increase_angle(&p->input)) {
         p->angle += (3/360.0) * 2 * CONST_PI;
@@ -147,7 +147,7 @@ void Player_ShootingHandler(Player *p, Game *game) {
     }
 }
 
-void Player_MovementHandler(Player *p, Game *game) {
+void Player_MovementHandler(Player *p, GameState *game) {
     // 1. INPUT HANDLING (always runs, doesn't affect state)
     float input_vx = 0;
     if (p->input_mapper.move_left(&p->input)) {
@@ -183,7 +183,7 @@ void Player_MovementHandler(Player *p, Game *game) {
     }
 }
 
-void Player_AnimationHandler(Player *p, Game *game) {
+void Player_AnimationHandler(Player *p, GameState *game) {
     // Animation
     int t = game->time;
     if (p->vx == 0) {
