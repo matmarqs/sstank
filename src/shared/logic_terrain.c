@@ -149,39 +149,7 @@ void Terrain_UpdateTexture(Terrain *terr) {
 }
 
 void Terrain_Clean(Terrain *terr) {
-    if (terr->background) SDL_DestroyTexture(terr->background);
-    if (terr->foreground) SDL_DestroyTexture(terr->foreground);
-    if (terr->render_texture) SDL_DestroyTexture(terr->render_texture);
-    if (terr->bg_surface) SDL_FreeSurface(terr->bg_surface);
-    if (terr->fg_surface) SDL_FreeSurface(terr->fg_surface);
     if (terr->destruction_mask) free(terr->destruction_mask);
-
-    Debug_Info("Terrain destroyed");
-}
-
-void Terrain_Render(Terrain *terr, SDL_Renderer *renderer) {
-    // Update texture if anything changed
-    Terrain_UpdateTexture(terr);
-
-    // Draw the combined texture
-    SDL_RenderCopy(renderer, terr->render_texture, NULL, NULL);
-}
-
-
-// Optional: Save current terrain to PNG (for debugging)
-void Terrain_DebugSave(Terrain *terr, char *filename) {
-    SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0,
-        terr->width, terr->height, 32, SDL_PIXELFORMAT_RGBA8888);
-
-    void *pixels;
-    int pitch;
-    SDL_LockTexture(terr->render_texture, NULL, &pixels, &pitch);
-    memcpy(surface->pixels, pixels, pitch * terr->height);
-    SDL_UnlockTexture(terr->render_texture);
-
-    IMG_SavePNG(surface, filename);
-    SDL_FreeSurface(surface);
-    Debug_Info("Saved terrain to %s", filename);
 }
 
 void Terrain_DestroyCircle(Terrain *terr, float cx, float cy, float radius) {

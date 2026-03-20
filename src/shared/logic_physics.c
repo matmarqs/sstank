@@ -2,7 +2,7 @@
 #include "logic_terrain.h" // Terrain_IsSolid, ....
 
 // ===== STATE DETERMINATION =====
-PlayerMoveState Movement_DeterminePlayerState(Terrain *terr, Player *p) {
+PlayerMoveState Physics_DeterminePlayerState(Terrain *terr, Player *p) {
     // Check both bottom corners for ground
     float feet_y = p->y + p->h;
     int left_ground = Terrain_IsSolid(terr, p->x, feet_y + 1);
@@ -11,7 +11,7 @@ PlayerMoveState Movement_DeterminePlayerState(Terrain *terr, Player *p) {
     return (left_ground || right_ground) ? GROUNDED : FALLING;
 }
 
-void Movement_UpdateGrounded(Terrain *terr, Player *p, float input_vx) {
+void Physics_UpdateGrounded(Terrain *terr, Player *p, float input_vx) {
     // No input? nothing to do
     if (input_vx == 0) {
         p->vx = 0;
@@ -44,7 +44,7 @@ void Movement_UpdateGrounded(Terrain *terr, Player *p, float input_vx) {
     p->vx = 0;
 }
 
-void Movement_UpdateFalling(Terrain *terr, Player *p, float input_vx) {
+void Physics_UpdateFalling(Terrain *terr, Player *p, float input_vx) {
     // Apply gravity (max fall speed)
     p->vy += GRAVITY / 60.0f;
 
