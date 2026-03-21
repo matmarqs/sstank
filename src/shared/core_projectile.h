@@ -1,10 +1,9 @@
-#ifndef _LOGIC_PROJECTILE_H
-#define _LOGIC_PROJECTILE_H
+#ifndef _CORE_PROJECTILE_H
+#define _CORE_PROJECTILE_H
 
 #include <SDL2/SDL.h>
 
-#include "struct_projectile.h"
-#include "struct_game.h"
+#include "core_types.h"
 
 #define PROJECTILE_WIDTH 80
 #define PROJECTILE_HEIGHT PROJECTILE_WIDTH

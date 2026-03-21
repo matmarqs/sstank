@@ -1,7 +1,6 @@
 #include <SDL2/SDL_net.h>
 
-#include "../shared/base_common.h"
-#include "../shared/base_debug.h"
+#include "../shared/base.h"
 #include "../shared/net_util.h"
 #include "../shared/net_protocol.h"
 

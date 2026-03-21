@@ -3,12 +3,9 @@
 #include <SDL2/SDL2_gfxPrimitives.h> // filledCircleRGBA
 #include <math.h> // sin, cos
 
-#include "base_common.h"
-#include "base_debug.h"
-
-#include "logic_projectile.h"
-#include "logic_terrain.h" // Terrain_CheckCollision
-#include "logic_player.h" // Player_Teleport
+#include "core_projectile.h"
+#include "core_terrain.h" // Terrain_CheckCollision
+#include "core_player.h" // Player_Teleport
 
 
 int Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer) {
@@ -124,7 +121,7 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
             if (p->type == 0) {
                 Terrain_DestroyCircle(&game->terrain, cx, cy, BOMB_RADIUS);
                 for (int i = 0; i < NUM_PLAYERS; i++) {
-                    Player *player = &game->players[i];
+                    PlayerState *player = &game->players[i];
                     if (!player->alive) continue;
                     if (CircleRectCollision(cx, cy, BOMB_RADIUS,
                                             player->x, player->y, 

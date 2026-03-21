@@ -1,7 +1,6 @@
 #include "cl_init.h"
 
-#include "../shared/base_common.h"
-#include "../shared/base_debug.h"
+#include "../shared/base.h"
 
 
 int ClientInit_MoveLeft(Input *input) {
@@ -28,7 +27,7 @@ int ClientInit_CycleArm(Input *input) {
     return input->l_shift;
 }
 
-void ClientInit_Player0(Player *p) {
+void ClientInit_Player0(PlayerState *p) {
     p->id = 0;
     p->sprite_inverted = TRUE;
     /* idle */
@@ -58,7 +57,7 @@ void ClientInit_Player0(Player *p) {
     p->input_mapper.cycle_arm = ClientInit_CycleArm;
 }
 
-void ClientInit_Player1(Player *p) {
+void ClientInit_Player1(PlayerState *p) {
     p->id = 1;
     p->sprite_inverted = TRUE;
 
@@ -89,7 +88,7 @@ void ClientInit_Player1(Player *p) {
     p->input_mapper.cycle_arm = ClientInit_CycleArm;
 }
 
-void ClientInit_Players(Player p[]) {
+void ClientInit_Players(PlayerState p[]) {
     ClientInit_Player0(&p[0]);
     ClientInit_Player1(&p[1]);
 }

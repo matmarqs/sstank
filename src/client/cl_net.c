@@ -1,11 +1,8 @@
 #include "cl_net.h"
 
 #include "../shared/net_protocol.h"
-#include "../shared/struct_game.h"
-#include "../shared/base_common.h"
-#include "../shared/logic_projectile.h"
-#include "../shared/logic_terrain.h"
-#include <SDL2/SDL_net.h>
+#include "../shared/core_projectile.h"
+#include "../shared/core_terrain.h"
 
 static ClientNet_Handler handlers[256];
 

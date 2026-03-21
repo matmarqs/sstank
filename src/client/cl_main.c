@@ -1,14 +1,12 @@
-#include "cl_main.h"
+#include "cl_types.h"
 #include "cl_init.h"
 #include "cl_net.h"
 
-#include "../shared/base_common.h"
-#include "../shared/base_debug.h"
+#include "../shared/base.h"
 
-#include "../shared/logic_player.h"
-#include "../shared/logic_terrain.h"
-#include "../shared/logic_projectile.h"
-#include "../shared/logic_input.h"
+#include "../shared/core_player.h"
+#include "../shared/core_terrain.h"
+#include "../shared/core_projectile.h"
 #include "../shared/net_util.h"
 
 #define SERVER_PORT 5555

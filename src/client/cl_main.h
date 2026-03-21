@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "cl_state_t.h"
+#include "cl_types.h"
 #include "../shared/base_config.h"
 
 void Client_Init(ClientState *client, char *ip_addr);

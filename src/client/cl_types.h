@@ -2,57 +2,49 @@
 #define _CLIENT_TYPES_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_net.h>
 
-#include "../shared/struct_input_mapper.h"
-#define PLAYER_NUM_SPRITES 12
-
-#include "../shared/struct_game.h"
-#include "../shared/struct_terrain.h"
+#include "../shared/core_types.h"
 
 #define PLAYER_NUM_SPRITES 12
+#define PROJECTILE_NUM_SPRITES 8
 
 typedef struct {
-    int id;
+    int w, a, s, d, space, l_shift;
+} Input;
 
-    float x, y;
-    float vx, vy;
+typedef struct {
+    int (*move_left)(Input *input);
+    int (*move_right)(Input *input);
+    int (*increase_angle)(Input *input);
+    int (*decrease_angle)(Input *input);
+    int (*throw_projectile)(Input *input);
+    int (*cycle_arm)(Input *input);
+} InputMapper;
 
-    int on_ground;
-
-    int alive;
-
-    int throwing;
-    int power;
-
-    float health;
+typedef struct {
+    PlayerState state;
 
     int damage_timer;
-
-    int change_arm_timer;
-    int curr_arm;
-
-    float w, h;
     float w_render, h_render;
-
-    int facing_right;
     int sprite_inverted;
-
-    float angle;
-    float angle_render;
-
     int curr_sprite;
-
-    Input input;
-
-    InputMapper input_mapper;
-
     int projectile_timer;
 
     char *sprites_path[PLAYER_NUM_SPRITES];
     SDL_Texture *sprites[PLAYER_NUM_SPRITES];
 } cl_player_t;
 
-#define PROJECTILE_NUM_SPRITES  8
+typedef struct {
+    cl_player_t player;
+    Input input;
+    float angle;
+    float angle_render;
+    int throwing;
+    int power;
+    int change_arm_timer;
+    int curr_arm;
+} cl_char_t;
 
 typedef struct {
     Projectile proj;
@@ -69,10 +61,6 @@ typedef struct {
 
 typedef struct {
     Terrain terrain;
-
-    // The two source images
-    SDL_Texture *background;  // Layer 1 - static beauty
-    SDL_Texture *foreground;  // Layer 2 - destructible gameplay layer
 
     // The combined result texture (streamed)
     SDL_Texture *render_texture;

@@ -1,8 +1,9 @@
 #include <SDL2/SDL_image.h> // IMG_LoadTexture
 #include <SDL2/SDL2_gfxPrimitives.h> // boxRGBA
 
-#include "../shared/base_common.h"
-#include "../shared/logic_player.h"
+#include "cl_types.h"
+#include "../shared/base.h"
+#include "../shared/core_player.h"
 
 int loop_integer(int i, int n) {
     int period = 2 * (n - 1);  // For n=6, period = 10
@@ -14,35 +15,55 @@ int loop_integer(int i, int n) {
     }
 }
 
-void Player_Update(Player *p, GameState *game) {
-    p->damage_timer--;
-    p->damage_timer = MAX(p->damage_timer, 0);
-    if (p->health <= 0) {
-        p->alive = 0;
+int ClientPlayer_Load(cl_player_t *cl_player, SDL_Renderer *renderer) {
+    Player_Init(&cl_player->state);
+
+    for (int i = 0; i < PLAYER_NUM_SPRITES; i++) {
+        if (cl_player->sprites_path[i]) {
+            cl_player->sprites[i] = IMG_LoadTexture(renderer, cl_player->sprites_path[i]);
+            if (!cl_player->sprites[i]) {
+                Debug_Error("ClientPlayer_Load error: loading image %s\n", cl_player->sprites_path[i]);
+                return FAILURE;
+            }
+        }
     }
-    if (p->alive) {
-        Player_ShootingHandler(p, game);
-        Player_MovementHandler(p, game);
-        Player_AnimationHandler(p, game);
-    }
+
+    int w, h;
+    SDL_QueryTexture(cl_player->sprites[0], NULL, NULL, &w, &h);
+    cl_player->w_render = BASE_PLAYER_WIDTH;
+    cl_player->h_render = BASE_PLAYER_HEIGHT * ((float) h) / w;
+
+    cl_player->curr_sprite = 0;
+    cl_player->projectile_timer = 0;
+    cl_player->damage_timer = 0;
+
+    return SUCCESS;
 }
 
-void Player_AnimationHandler(Player *p, GameState *game) {
+void ClientPlayer_AnimationHandler(cl_player_t *p, GameState *game) {
     // Animation
     int t = game->time;
-    if (p->vx == 0) {
+    if (p->state.vx == 0) {
         p->curr_sprite = loop_integer(t / 8, 5);
     } else {
-        if (p->id == 0) {
-            p->curr_sprite = 5 + loop_integer(t / 10, 7);
-        }
-        else {
-            p->curr_sprite = 5 + loop_integer(t / 5, 7);
-        }
+        p->curr_sprite = 5 + loop_integer(t / 5, 7);
     }
 }
 
-void Player_RenderPowerGauge(Player *p, SDL_Renderer *renderer) {
+void ClientPlayer_Update(cl_player_t *p, GameState *game) {
+    p->damage_timer--;
+    p->damage_timer = MAX(p->damage_timer, 0);
+    if (p->state.health <= 0) {
+        p->state.alive = 0;
+    }
+    if (p->state.alive) {
+        ClientPlayer_ShootingHandler(p, game);
+        ClientPlayer_MovementHandler(p, game);
+        ClientPlayer_AnimationHandler(p, game);
+    }
+}
+
+void ClientPlayer_RenderPowerGauge(cl_player_t *p, SDL_Renderer *renderer) {
     int gauge_x = p->x - p->w/2;
     int gauge_y = p->y - p->w/2;  // Above the visor
 
@@ -101,7 +122,7 @@ void Player_RenderPowerGauge(Player *p, SDL_Renderer *renderer) {
     }
 }
 
-void Player_Render(Player *p, SDL_Renderer *renderer) {
+void ClientPlayer_Render(cl_player_t *p, SDL_Renderer *renderer) {
     if (p->alive) {
         if (p->damage_timer > 0) {
             // Make sprite reddish
@@ -130,7 +151,7 @@ void Player_Render(Player *p, SDL_Renderer *renderer) {
         float end_y = center_y + (radius + norm) * (-sin(theta));   // y axis is inverted
 
         //        // Draw UI elements
-        Player_RenderPowerGauge(p, renderer);
+        ClientPlayer_RenderPowerGauge(p, renderer);
 
         //circleRGBA(renderer, center_x, center_y, radius, 0, 0, 0, 255);
 
