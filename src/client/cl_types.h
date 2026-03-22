@@ -10,18 +10,13 @@
 #define PROJECTILE_NUM_SPRITES 8
 
 typedef struct {
-    int w, a, s, d, space, l_shift;
+    int left, right;    // movement
+    int up, down;   // angle aiming
+    int shoot;  // shooting the projectile
+    int change_arm; // change the weapon
 } Input;
 
-typedef struct {
-    int (*move_left)(Input *input);
-    int (*move_right)(Input *input);
-    int (*increase_angle)(Input *input);
-    int (*decrease_angle)(Input *input);
-    int (*throw_projectile)(Input *input);
-    int (*cycle_arm)(Input *input);
-} InputMapper;
-
+/* cl_player_t: (PlayerState + Rendering aspects) */
 typedef struct {
     PlayerState state;
 
@@ -29,14 +24,15 @@ typedef struct {
     float w_render, h_render;
     int sprite_inverted;
     int curr_sprite;
-    int projectile_timer;
 
     char *sprites_path[PLAYER_NUM_SPRITES];
     SDL_Texture *sprites[PLAYER_NUM_SPRITES];
 } cl_player_t;
 
+/* cl_char_t: (PlayerState + Rendering aspects) + Inputs */
 typedef struct {
     cl_player_t player;
+    int id;
     Input input;
     float angle;
     float angle_render;
@@ -44,19 +40,18 @@ typedef struct {
     int power;
     int change_arm_timer;
     int curr_arm;
+    int projectile_timer;
 } cl_char_t;
 
 typedef struct {
-    Projectile proj;
     float angle;
     int facing_left;
-    int explosion_timer;
-} cl_projectile_t;
+} cl_projectile_control_t;
 
 typedef struct {
-    cl_projectile_t projectiles[MAX_PROJECTILES];
+    ProjectileSystem sys;
+    cl_projectile_control_t control[MAX_PROJECTILES];
     SDL_Texture *sprites[PROJECTILE_NUM_SPRITES];
-    int count;
 } cl_projectile_sys_t;
 
 typedef struct {
@@ -77,10 +72,12 @@ typedef struct {
     GameState game;
 
     int start;
-
     int my_player_id;
 
-    Input input;
+    cl_player_t cl_players[NUM_PLAYERS];
+    cl_char_t cl_char;
+    cl_projectile_sys_t cl_projectile_sys;
+    cl_terrain_t cl_terrain;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -89,6 +86,6 @@ typedef struct {
 
     TCPsocket server_socket;
     SDLNet_SocketSet server_socket_set;
-} ClientState;
+} cl_state_t;
 
 #endif

@@ -5,15 +5,22 @@
 
 #define NUM_PLAYERS 2
 #define MAX_PROJECTILES 10
+#define MAX_POWER 500
+
+#define PLAYER_SPEED 300   /* speed in pixels/sec */
+#define BASE_PLAYER_HEIGHT 60
+#define BASE_PLAYER_WIDTH BASE_PLAYER_HEIGHT
+
+#define TERRAIN_WIDTH  WORLD_WIDTH
+#define TERRAIN_HEIGHT WORLD_HEIGHT
+
+#define PROJECTILE_WIDTH 80
+#define PROJECTILE_HEIGHT PROJECTILE_WIDTH
+#define BOMB_RADIUS PROJECTILE_WIDTH
 
 typedef struct {
     uint8_t move_left : 1;   // 1 bit
     uint8_t move_right : 1;
-    uint8_t jump : 1;
-    uint8_t shoot : 1;
-    uint8_t aim_up : 1;
-    uint8_t aim_down : 1;
-    // 2 bits unused
 } PlayerActions;
 
 typedef struct {
@@ -35,6 +42,7 @@ typedef struct {
     float w, h;
     int owner;
     ProjectileState state;
+    int explosion_timer;
 } Projectile;
 
 typedef struct {
@@ -53,6 +61,8 @@ typedef struct {
 } GroundContact;
 
 typedef struct {
+    int id;
+
     float x, y;
     float vx, vy;
     float w, h;

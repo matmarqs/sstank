@@ -3,9 +3,6 @@
 
 #include "core_types.h"
 
-#define TERRAIN_WIDTH  WORLD_WIDTH
-#define TERRAIN_HEIGHT WORLD_HEIGHT
-
 // Helper functions
 int mask_index(int width, int x, int y);
 int valid_coord(int x, int y, int width, int height);

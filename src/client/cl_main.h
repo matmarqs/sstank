@@ -1,16 +1,13 @@
 #ifndef _CLIENT_MAIN_H
 #define _CLIENT_MAIN_H
 
-#include <SDL2/SDL.h>
-
 #include "cl_types.h"
-#include "../shared/base_config.h"
 
-void Client_Init(ClientState *client, char *ip_addr);
-SDL_Texture *Client_LoadImage(ClientState *client, char *img_path);
-void Client_Load(ClientState *client);
-int Client_Update(ClientState *client);
-void Client_Render(ClientState *client);
-void Client_Clean(ClientState *client, int exit_code);
+void Client_Init(cl_state_t *client, char *ip_addr);
+SDL_Texture *Client_LoadImage(cl_state_t *client, char *img_path);
+void Client_Load(cl_state_t *client);
+int Client_Update(cl_state_t *client);
+void Client_Render(cl_state_t *client);
+void Client_Clean(cl_state_t *client, int exit_code);
 
 #endif

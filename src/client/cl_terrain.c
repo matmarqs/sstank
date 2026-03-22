@@ -1,6 +1,6 @@
 #include <SDL2/SDL_image.h>
 
-#include "cl_types.h"
+#include "cl_terrain.h"
 #include "../shared/core_terrain.h"
 
 void ClientTerrain_Clean(cl_terrain_t *cl_terr) {
@@ -32,7 +32,7 @@ int ClientTerrain_Init(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
     return SUCCESS;
 }
 
-int ClientTerrain_Load(cl_terrain_t *cl_terr, SDL_Renderer *renderer, char *bg_path, char *fg_path) {
+int ClientTerrain_Load(cl_terrain_t *cl_terr, char *bg_path, char *fg_path) {
     Terrain_Load(&cl_terr->terrain, fg_path);
 
     // STEP 1: Load as surfaces (CPU memory)

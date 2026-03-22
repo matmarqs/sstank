@@ -4,39 +4,23 @@
 #include <math.h> // sin, cos
 
 #include "core_projectile.h"
-#include "core_terrain.h" // Terrain_CheckCollision
+#include "core_physics.h" // Physics_CheckCollision
+#include "core_terrain.h" // Terrain_DestroyCircle
 #include "core_player.h" // Player_Teleport
 
-
-int Projectile_Load(ProjectileSystem *ps, SDL_Renderer *renderer) {
-    ps->sprites[0] = IMG_LoadTexture(renderer, "assets/img/toppng.com-bombs-1668x1686.png");
-    if (!ps->sprites[0]) {
-        Debug_Error("Bomb sprite not found");
-        return FAILURE;
-    }
-    ps->sprites[1] = IMG_LoadTexture(renderer, "assets/img/airplane.png");
-    if (!ps->sprites[1]) {
-        Debug_Error("Airplane sprite not found");
-        return FAILURE;
-    }
-    for (int i = 2; i < PROJECTILE_NUM_SPRITES; i++) {
-        ps->sprites[i] = NULL;
-    }
-
+int Projectile_Load(ProjectileSystem *ps) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         ps->projectiles[i].state = PROJECTILE_INACTIVE;
     }
     ps->count = 0;
-
     return SUCCESS;
 }
 
-void Projectile_Throw(ProjectileSystem *ps, int type, float x, float y, float angle, float power, int owner) {
+int Projectile_Throw(ProjectileSystem *ps, int type, float x, float y, float angle, float power, int owner) {
     if (ps->count >= MAX_PROJECTILES) {
         Debug_Warn("Maximum projectiles reached!");
-        return;
+        return -1;
     }
-
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         if (ps->projectiles[i].state == PROJECTILE_INACTIVE) {
             float speed = power * 5.0f;
@@ -45,20 +29,19 @@ void Projectile_Throw(ProjectileSystem *ps, int type, float x, float y, float an
             ps->projectiles[i].y = y - PROJECTILE_HEIGHT / 2.0;
             ps->projectiles[i].vx = speed * cos(angle);
             ps->projectiles[i].vy = -speed * sin(angle);    // y axis is inverted
-            ps->projectiles[i].angle = 0;
             ps->projectiles[i].w = PROJECTILE_WIDTH;
             ps->projectiles[i].h = PROJECTILE_HEIGHT;
             ps->projectiles[i].state = PROJECTILE_ACTIVE;
             ps->projectiles[i].owner = owner;
             ps->projectiles[i].explosion_timer = 0;
-            ps->projectiles[i].facing_left = (ps->projectiles[i].vx < 0) ? SDL_FLIP_VERTICAL : 0;
-            return;
+            return i;
         }
     }
+    return -1;
 }
 
 // Check if circle (explosion) intersects rectangle (player)
-int CircleRectCollision(float circle_x, float circle_y, float radius,
+static int CircleRectCollision(float circle_x, float circle_y, float radius,
                         float rect_x, float rect_y, float rect_w, float rect_h) {
 
     // Find closest point on rectangle to circle
@@ -93,27 +76,11 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
         p->y += p->vy / 60;
         p->vy += GRAVITY / 60;
 
-        if (p->type == 0) {
-            // Update rotation based on velocity
-            if (fabs(p->vx) > 0.1f || fabs(p->vy) > 0.1f) {
-                p->angle = atan2(-p->vy, fabs(p->vx));
-            }
-        }
-        else if (p->type == 1) {
-            // Base angle
-            float base = -atan2(-p->vy, p->vx);
-
-            // Bias depends on direction
-            float bias = (p->vx > 0) ? -0.2f : 0.2f;
-
-            p->angle = base + bias;
-        }
-
         // Collision
         if (p->x < -p->w || p->x > game->w || p->y > game->h) {
             p->state = PROJECTILE_INACTIVE;
         }
-        else if (Terrain_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h)) {
+        else if (Physics_CheckCollision(&game->terrain, p->x, p->y, p->w, p->h)) {
             p->state = PROJECTILE_EXPLODING;
             p->explosion_timer = 10;
             float cx = p->x + p->w/2.0;
@@ -127,7 +94,6 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
                                             player->x, player->y, 
                                             player->w, player->h)) {
                         player->health -= 20;
-                        player->damage_timer = 60;
                     }
                 }
             }
@@ -145,7 +111,7 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
                         float player_y = check_y - game->players[p->owner].h/2;
 
                         // Check if position is safe
-                        if (!Terrain_CheckCollision(&game->terrain, 
+                        if (!Physics_CheckCollision(&game->terrain, 
                                                     player_x, player_y,
                                                     game->players[p->owner].w,
                                                     game->players[p->owner].h)) {
@@ -156,48 +122,6 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
                     }
                 }
             }
-        }
-    }
-}
-
-void Projectile_Render(ProjectileSystem *ps, SDL_Renderer *renderer) {
-    for (int i = 0; i < MAX_PROJECTILES; i++) {
-        Projectile *p = &ps->projectiles[i];
-
-        if (p->state == PROJECTILE_INACTIVE) continue;
-
-        if (p->state == PROJECTILE_EXPLODING) {
-            // Draw explosion
-            int radius = BOMB_RADIUS + (10 - p->explosion_timer);
-            if (p->type == 0) {
-                filledCircleRGBA(renderer, p->x + p->w/2.0, p->y + p->h/2.0, radius, // reddish
-                                 255, 200, 0, 100 + p->explosion_timer * 15);
-            }
-            else if (p->type == 1) {
-                filledCircleRGBA(renderer, p->x + p->w/2.0, p->y + p->h/2.0, radius, // blueish
-                                 50, 50, 255, 100 + p->explosion_timer * 15);
-            }
-            continue;
-        }
-
-        // Draw active projectile
-        SDL_Rect rect = { p->x, p->y, p->w, p->h };
-        if (p->type == 0) {
-            SDL_RenderCopyEx(renderer, ps->sprites[p->type], NULL, &rect,
-                             p->angle * 180 / CONST_PI, NULL, SDL_FLIP_NONE);
-        }
-        else if (p->type == 1) {
-            SDL_RenderCopyEx(renderer, ps->sprites[p->type], NULL, &rect,
-                             p->angle * 180 / CONST_PI, NULL, p->facing_left);
-        }
-    }
-}
-
-void Projectile_Clean(ProjectileSystem *ps) {
-    for (int i = 0; i < PROJECTILE_NUM_SPRITES; i++) {
-        if (ps->sprites[i]) {
-            SDL_DestroyTexture(ps->sprites[i]);
-            ps->sprites[i] = NULL;
         }
     }
 }
