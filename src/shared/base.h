@@ -6,6 +6,8 @@
 #include "base_debug.h"
 #include "base_config.h"
 
+#define SERVER_PORT 5555
+
 #define CONST_PI 3.14159265
 
 #define TRUE 1

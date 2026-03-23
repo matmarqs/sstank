@@ -73,6 +73,8 @@ typedef struct {
     int on_ground;
     int facing_right;
     int throw_cooldown;
+
+    uint32_t last_processed_seq;
 } PlayerState;
 
 typedef struct {

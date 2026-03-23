@@ -7,15 +7,11 @@ void ClientTerrain_Clean(cl_terrain_t *cl_terr) {
     if (cl_terr->render_texture) SDL_DestroyTexture(cl_terr->render_texture);
     if (cl_terr->bg_surface) SDL_FreeSurface(cl_terr->bg_surface);
     if (cl_terr->fg_surface) SDL_FreeSurface(cl_terr->fg_surface);
-    Terrain_Clean(&cl_terr->terrain);
-    Debug_Info("Terrain destroyed");
 }
 
 int ClientTerrain_Init(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
-    Terrain_Init(&cl_terr->terrain);
-
-    int width = cl_terr->terrain.width;
-    int height = cl_terr->terrain.height;
+    int width = cl_terr->terrain->width;
+    int height = cl_terr->terrain->height;
 
     // Create render texture for streaming
     cl_terr->render_texture = SDL_CreateTexture(renderer,
@@ -29,12 +25,12 @@ int ClientTerrain_Init(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
         return FAILURE;
     }
 
+    cl_terr->dirty = 0;
+
     return SUCCESS;
 }
 
 int ClientTerrain_Load(cl_terrain_t *cl_terr, char *bg_path, char *fg_path) {
-    Terrain_Load(&cl_terr->terrain, fg_path);
-
     // STEP 1: Load as surfaces (CPU memory)
     SDL_Surface *bg_surface = IMG_Load(bg_path);
     if (!bg_surface) {
@@ -75,7 +71,7 @@ void ClientTerrain_UpdateTexture(cl_terrain_t *cl_terr) {
     // Combine based on destruction mask
     int pixels_per_row = pitch / sizeof(Uint32);
 
-    Terrain *terr = &cl_terr->terrain;
+    Terrain *terr = cl_terr->terrain;
 
     for (int y = 0; y < terr->height; y++) {
         for (int x = 0; x < terr->width; x++) {

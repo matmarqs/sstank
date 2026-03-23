@@ -20,6 +20,7 @@ enum {
     SVMSG_PLAYER_HEALTH,
     SVMSG_PROJECTILE_NEW,
     SVMSG_TERRAIN_DESTROY,
+    SVMSG_GAME_OVER,
 };
 
 typedef struct {
@@ -30,6 +31,7 @@ typedef struct {
         struct { uint8_t id; float health; } player_health;
         struct { uint8_t id; float x, y, angle, power; int type; } projectile_new;
         struct { float x, y; float radius; } terrain_destroy;
+        struct { int winner; } game_winner;
     } data;
 } ServerMessage;
 
@@ -40,6 +42,8 @@ enum {
 
 typedef struct {
     uint8_t type;
+    uint32_t sequence;
+    uint32_t timestamp;
     union {
         struct { uint8_t left, right; } player_input;
         struct { float angle, power; int type; } projectile_throw;
@@ -50,6 +54,7 @@ typedef struct {
     TCPsocket socket;
     int id;
     int active;
+    uint32_t last_input_seq;
 } Client;
 
 void NetProtocol_SendPacketToClient(Client *client, uint8_t packet_id, void *data, int len_data);

@@ -8,4 +8,7 @@
 
 #define GRAVITY 1000.0f
 
+#define MAP_FG "assets/img/maptest_foreground.png"
+#define MAP_BG "assets/img/maptest_background.png"
+
 #endif

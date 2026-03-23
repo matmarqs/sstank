@@ -18,7 +18,7 @@ typedef struct {
 
 /* cl_player_t: (PlayerState + Rendering aspects) */
 typedef struct {
-    PlayerState state;
+    PlayerState *state;
 
     int damage_timer;
     float w_render, h_render;
@@ -31,7 +31,7 @@ typedef struct {
 
 /* cl_char_t: (PlayerState + Rendering aspects) + Inputs */
 typedef struct {
-    cl_player_t player;
+    cl_player_t *player;
     int id;
     Input input;
     float angle;
@@ -49,13 +49,13 @@ typedef struct {
 } cl_projectile_control_t;
 
 typedef struct {
-    ProjectileSystem sys;
+    ProjectileSystem *sys;
     cl_projectile_control_t control[MAX_PROJECTILES];
     SDL_Texture *sprites[PROJECTILE_NUM_SPRITES];
 } cl_projectile_sys_t;
 
 typedef struct {
-    Terrain terrain;
+    Terrain *terrain;
 
     // The combined result texture (streamed)
     SDL_Texture *render_texture;
@@ -69,21 +69,24 @@ typedef struct {
 } cl_terrain_t;
 
 typedef struct {
-    GameState game;
+    /* game logic */
+    GameState *game;
+    int game_over;
 
-    int start;
-    int my_player_id;
-
+    /* client wrappers */
     cl_player_t cl_players[NUM_PLAYERS];
     cl_char_t cl_char;
     cl_projectile_sys_t cl_projectile_sys;
     cl_terrain_t cl_terrain;
 
+    /* rendering */
     SDL_Window *window;
     SDL_Renderer *renderer;
-
     SDL_Event event;
 
+    /* network */
+    int start;
+    int my_player_id;
     TCPsocket server_socket;
     SDLNet_SocketSet server_socket_set;
 } cl_state_t;

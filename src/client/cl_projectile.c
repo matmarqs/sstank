@@ -5,8 +5,6 @@
 #include "../shared/core_projectile.h"
 
 int ClientProjectile_Load(cl_projectile_sys_t *cl_ps, SDL_Renderer *renderer) {
-    Projectile_Load(&cl_ps->sys);
-
     cl_ps->sprites[0] = IMG_LoadTexture(renderer, "assets/img/toppng.com-bombs-1668x1686.png");
     if (!cl_ps->sprites[0]) {
         Debug_Error("Bomb sprite not found");
@@ -31,7 +29,7 @@ int ClientProjectile_Load(cl_projectile_sys_t *cl_ps, SDL_Renderer *renderer) {
 
 void ClientProjectile_Throw(cl_projectile_sys_t *ps, int type, float x, float y,
                             float angle, float power, int owner) {
-    ProjectileSystem *sys = &ps->sys;
+    ProjectileSystem *sys = ps->sys;
     int i = Projectile_Throw(sys, type, x, y, angle, power, owner);
     if (0 <= i && i < MAX_PROJECTILES) {
         Projectile *p = &sys->projectiles[i];
@@ -42,11 +40,11 @@ void ClientProjectile_Throw(cl_projectile_sys_t *ps, int type, float x, float y,
 }
 
 void ClientProjectile_Update(cl_projectile_sys_t *ps, GameState *game) {
-    Projectile_Update(&ps->sys, game);
+    Projectile_Update(ps->sys, game);
 
     /* Client only projectile control properties */
     for (int i = 0; i < MAX_PROJECTILES; i++) {
-        Projectile *p = &ps->sys.projectiles[i];
+        Projectile *p = &ps->sys->projectiles[i];
         if (p->state == PROJECTILE_INACTIVE) continue;
 
         cl_projectile_control_t *control = &ps->control[i];
@@ -68,7 +66,7 @@ void ClientProjectile_Update(cl_projectile_sys_t *ps, GameState *game) {
 
 void ClientProjectile_Render(cl_projectile_sys_t *ps, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
-        Projectile *p = &ps->sys.projectiles[i];
+        Projectile *p = &ps->sys->projectiles[i];
         cl_projectile_control_t *control = &ps->control[i];
 
         if (p->state == PROJECTILE_INACTIVE) continue;
