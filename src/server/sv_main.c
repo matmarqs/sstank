@@ -63,14 +63,6 @@ void Server_Init(Server *server) {
     // Initialize authoritative game state
     Game_Init(&server->game);
 
-    // Position players at spawn points with proper ground detection
-    float ground_y0 = Physics_GetGroundY(&server->game.terrain, 200);
-    server->game.players[0].x = 200;
-    server->game.players[0].y = ground_y0 - BASE_PLAYER_HEIGHT;
-    float ground_y1 = Physics_GetGroundY(&server->game.terrain, WORLD_WIDTH - 200);
-    server->game.players[1].x = WORLD_WIDTH - 200 - BASE_PLAYER_WIDTH;
-    server->game.players[1].y = ground_y1 - BASE_PLAYER_HEIGHT;
-
     server->game_started = 0;
     server->last_tick = SDL_GetTicks();
 

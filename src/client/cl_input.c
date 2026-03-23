@@ -1,11 +1,11 @@
 #include "cl_input.h"
 
-void Input_InitKeys(Input *input) {
+void cl_input_InitKeys(cl_input_t *input) {
     input->up = input->left = input->down =
     input->right = input->shoot = input->change_arm = FALSE;
 }
 
-int Input_SetEvents(SDL_Event *ev, Input *input) {
+int cl_input_SetEvents(SDL_Event *ev, cl_input_t *input) {
     int done = FALSE;
 
     while (SDL_PollEvent(ev)) {
@@ -46,7 +46,7 @@ int Input_SetEvents(SDL_Event *ev, Input *input) {
     return done;
 }
 
-PlayerActions Input_GetActions(Input *raw) {
+PlayerActions cl_input_GetActions(cl_input_t *raw) {
     PlayerActions actions = {0};
     actions.move_left = raw->left;
     actions.move_right = raw->right;

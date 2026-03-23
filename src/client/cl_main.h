@@ -3,9 +3,9 @@
 
 #include "cl_types.h"
 
-void Client_Init(cl_state_t *client, char *ip_addr);
-int Client_Update(cl_state_t *client);
-void Client_Render(cl_state_t *client);
-void Client_Clean(cl_state_t *client, int exit_code);
+void cl__Init(cl_state_t *client, GameState *game, char *ip_addr);
+int cl__Update(cl_state_t *client);
+void cl__Render(cl_state_t *client);
+void cl__Clean(cl_state_t *client, int exit_code);
 
 #endif

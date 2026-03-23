@@ -1,7 +1,7 @@
 # Adapted from <https://makefiletutorial.com/#makefile-cookbook>
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -g -static $(shell pkg-config --cflags sdl2 SDL2_image SDL2_gfx SDL2_net)
+CFLAGS = -Wall -Wextra -std=c99 -ggdb $(shell pkg-config --cflags sdl2 SDL2_image SDL2_gfx SDL2_net)
 LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_image SDL2_gfx SDL2_net) -lm
 
 SRC_DIRS := ./src

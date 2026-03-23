@@ -3,13 +3,14 @@
 #include "cl_terrain.h"
 #include "../shared/core_terrain.h"
 
-void ClientTerrain_Clean(cl_terrain_t *cl_terr) {
+void cl_terrain_Clean(cl_terrain_t *cl_terr) {
     if (cl_terr->render_texture) SDL_DestroyTexture(cl_terr->render_texture);
     if (cl_terr->bg_surface) SDL_FreeSurface(cl_terr->bg_surface);
     if (cl_terr->fg_surface) SDL_FreeSurface(cl_terr->fg_surface);
 }
 
-int ClientTerrain_Init(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
+int cl_terrain_Init(cl_terrain_t *cl_terr, Terrain *terrain, SDL_Renderer *renderer) {
+    cl_terr->terrain = terrain;
     int width = cl_terr->terrain->width;
     int height = cl_terr->terrain->height;
 
@@ -21,7 +22,7 @@ int ClientTerrain_Init(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
 
     if (!cl_terr->render_texture) {
         Debug_Error("Failed to create render texture: %s", SDL_GetError());
-        ClientTerrain_Clean(cl_terr);
+        cl_terrain_Clean(cl_terr);
         return FAILURE;
     }
 
@@ -30,7 +31,7 @@ int ClientTerrain_Init(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
     return SUCCESS;
 }
 
-int ClientTerrain_Load(cl_terrain_t *cl_terr, char *bg_path, char *fg_path) {
+int cl_terrain_Load(cl_terrain_t *cl_terr, char *bg_path, char *fg_path) {
     // STEP 1: Load as surfaces (CPU memory)
     SDL_Surface *bg_surface = IMG_Load(bg_path);
     if (!bg_surface) {
@@ -55,7 +56,7 @@ int ClientTerrain_Load(cl_terrain_t *cl_terr, char *bg_path, char *fg_path) {
     return SUCCESS;
 }
 
-void ClientTerrain_UpdateTexture(cl_terrain_t *cl_terr) {
+void cl_terrain_UpdateTexture(cl_terrain_t *cl_terr) {
     if (!cl_terr->dirty) return;
 
     // Lock the texture for direct pixel access
@@ -94,9 +95,9 @@ void ClientTerrain_UpdateTexture(cl_terrain_t *cl_terr) {
     Debug_Info("Texture updated");
 }
 
-void ClientTerrain_Render(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
+void cl_terrain_Render(cl_terrain_t *cl_terr, SDL_Renderer *renderer) {
     // Update texture if anything changed
-    ClientTerrain_UpdateTexture(cl_terr);
+    cl_terrain_UpdateTexture(cl_terr);
     // Draw the combined texture
     SDL_RenderCopy(renderer, cl_terr->render_texture, NULL, NULL);
 }

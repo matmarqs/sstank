@@ -7,77 +7,50 @@
 #include "cl_terrain.h"
 #include "cl_projectile.h"
 #include "../shared/core_game.h"
+#include "cl_types.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        Debug_Info("Usage: ./client.elf SERVER_IP");
-        return EXIT_FAILURE;
-    }
+    char *ip_addr = "127.0.0.1";
+    if (argc < 2)
+        Debug_Info("Assuming SERVER_IP is 127.0.0.1");
+    else
+        ip_addr = argv[1];
 
     /* Loading the game */
     GameState game;
-    Game_Init(&game);
     cl_state_t client;
-    client.game = &game;
-    Client_Init(&client, argv[1]);
+    cl__Init(&client, &game, ip_addr);
 
     /* game loop */
     int done = FALSE;
-    while (!done) {
-        done = Client_Update(&client);
-        Client_Render(&client);
+    while (done) {
+        done = cl__Update(&client);
+        cl__Render(&client);
         SDL_Delay(1000/60);
     }
 
-    Client_Clean(&client, EXIT_SUCCESS);
+    cl__Clean(&client, EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
 
-void Client_Init(cl_state_t *client, char *ip_addr) {
-    /* NETWORKING */
-    ClientNet_InitSockets(client, ip_addr);
-    ClientNet_InitHandlers();
-    client->start = 0;
-    client->my_player_id = -1;
-    while (client->my_player_id == -1 || !client->start) {
-        int quit = ClientNet_RecvFromServer(client, 60);
-        if (quit) {
-            Client_Clean(client, EXIT_FAILURE);
-        }
-    }
-    Debug_Info("Connected. Player ID: %d", client->my_player_id);
-
-    /* RENDERING */
-    ClientInit_Rendering(client);
-
-    /* GAME LOGIC */
-
-    // Terrain
-    client->cl_terrain.terrain = &client->game->terrain;
-    ClientTerrain_Init(&client->cl_terrain, client->renderer);
-    ClientTerrain_Load(&client->cl_terrain, MAP_BG, MAP_FG);
-
-    // Players
-    ClientInit_Players(client->cl_players);
-    for (int i = 0; i < NUM_PLAYERS; i++) {
-        client->cl_players[i].state = &client->game->players[i];
-        ClientPlayer_Load(&client->cl_players[i], client->renderer);
-    }
-    ClientChar_Init(client);
-
-    // Projectiles
-    client->cl_projectile_sys.sys = &client->game->projectile_sys;
-    ClientProjectile_Load(&client->cl_projectile_sys, client->renderer);
+void cl__Init(cl_state_t *client, GameState *game, char *ip_addr) {
+    Game_Init(game);
+    client->game = game;
+    cl_init_Net(client, ip_addr);
+    cl_init_Rendering(client);
+    cl_init_Terrain(client);
+    cl_init_Players(client);
+    cl_init_Projectiles(client);
 }
 
-int Client_Update(cl_state_t *client) {
+int cl__Update(cl_state_t *client) {
     GameState *game = client->game;
     game->time++;
 
     // Get input from SDL events
-    int quit_local = Input_SetEvents(&client->event, &client->cl_char.input);
+    int quit_local = cl_input_SetEvents(&client->event, &client->cl_char.input);
 
-    ClientChar_Update(client);
+    cl_char_Update(&client->cl_char);
 
     // Convert raw input to actions
     PlayerActions actions = {
@@ -86,64 +59,46 @@ int Client_Update(cl_state_t *client) {
     };
 
     // Send actions to server
-    ClientNet_SendActions(client, actions);
+    cl_net_SendActions(client, actions);
 
     // Receive world state from server
     // Update local game state with server data
-    // (Server updates happen via ClientNet_RecvFromServer)
-    int quit_net = ClientNet_RecvFromServer(client, 0);
+    // (Server updates happen via cl_net_RecvFromServer)
+    int quit_net = cl_net_RecvFromServer(client, 0);
 
     // Run projectile physics locally (for rendering)
-    ClientProjectile_Update(&client->cl_projectile_sys, client->game);
+    cl_projectile_Update(&client->cl_projectile_sys, client->game);
 
     // Update client-side rendering data
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        ClientPlayer_Update(&client->cl_players[i], game, actions, 1/60.0);
+        cl_player_Update(&client->cl_players[i], game, actions, 1/60.0);
     }
 
     return quit_local || quit_net || client->game_over;
 }
 
-void Client_Render(cl_state_t *client) {
+void cl__Render(cl_state_t *client) {
     SDL_SetRenderDrawColor(client->renderer, 0, 0, 0, 255);
     SDL_RenderClear(client->renderer);
 
     // Draw terrain
-    ClientTerrain_Render(&client->cl_terrain, client->renderer);
+    cl_terrain_Render(&client->cl_terrain, client->renderer);
 
     // Draw players
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        ClientPlayer_Render(&client->cl_players[i], client->renderer);
+        cl_player_Render(&client->cl_players[i], client->renderer);
     }
 
     // Draw power gauge for local player only
-    ClientChar_RenderAngle(&client->cl_char, client->renderer);
-    ClientChar_RenderPowerGauge(&client->cl_char, client->renderer);
+    cl_char_RenderAngle(&client->cl_char, client->renderer);
+    cl_char_RenderPowerGauge(&client->cl_char, client->renderer);
 
     // Draw projectiles
-    ClientProjectile_Render(&client->cl_projectile_sys, client->renderer);
+    cl_projectile_Render(&client->cl_projectile_sys, client->renderer);
 
     SDL_RenderPresent(client->renderer);
 }
 
-void Client_Clean(cl_state_t *client, int exit_code) {
-    Game_Clean(client->game);
-
-    if (client->server_socket) SDLNet_TCP_Close(client->server_socket);
-    if (client->server_socket_set) SDLNet_FreeSocketSet(client->server_socket_set);
-
-    for (int i = 0; i < NUM_PLAYERS; i++) {
-        ClientPlayer_Clean(&client->cl_players[i]);
-    }
-
-    ClientTerrain_Clean(&client->cl_terrain);
-    ClientProjectile_Clean(&client->cl_projectile_sys);
-
-    if (client->renderer) SDL_DestroyRenderer(client->renderer);
-    if (client->window) SDL_DestroyWindow(client->window);
-
-    SDLNet_Quit();
-    Debug_Info("Client cleaned successfully");
-    SDL_Quit();
-    exit(exit_code);
+void cl__Clean(cl_state_t *client, int exit_code) {
+    cl_init_Clean(client, exit_code);
 }

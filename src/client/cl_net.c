@@ -6,30 +6,30 @@
 #include "../shared/core_terrain.h"
 #include "../shared/net_util.h"
 
-static ClientNet_Handler handlers[256];
+static cl_net_Handler handlers[256];
 
-static int ClientNet_H_PACKET_SV_WELCOME(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_PACKET_SV_WELCOME(cl_state_t *client, void *data, int len_data) {
     UNUSED(len_data);
     int offset = sizeof(uint8_t);
     client->my_player_id = *(int *)(data + offset);
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_FULL(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_PACKET_SV_FULL(cl_state_t *client, void *data, int len_data) {
     UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
     return 1;
 }
 
-static int ClientNet_H_NOOP(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_NOOP(cl_state_t *client, void *data, int len_data) {
     UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_START(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_PACKET_SV_START(cl_state_t *client, void *data, int len_data) {
     UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
@@ -37,14 +37,14 @@ static int ClientNet_H_PACKET_SV_START(cl_state_t *client, void *data, int len_d
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_DISCONNECT(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_PACKET_SV_DISCONNECT(cl_state_t *client, void *data, int len_data) {
     UNUSED(client);
     UNUSED(data);
     UNUSED(len_data);
     return 1;   // return 1 in order to quit
 }
 
-static int ClientNet_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len_data) {
     UNUSED(len_data);
     GameState *game = client->game;
     int offset = sizeof(uint8_t);
@@ -56,7 +56,7 @@ static int ClientNet_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len
             game->players[packet.data.player_pos.id].y = packet.data.player_pos.y;
             break;
         case SVMSG_PLAYER_HEALTH:
-            ClientPlayer_TakeDamage(&client->cl_players[packet.data.player_health.id],
+            cl_player_TakeDamage(&client->cl_players[packet.data.player_health.id],
                                     packet.data.player_health.health);
             break;
         case SVMSG_PROJECTILE_NEW:
@@ -81,7 +81,7 @@ static int ClientNet_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len
     return 0;
 }
 
-static int ClientNet_H_PACKET_SV_GAME_OVER(cl_state_t *client, void *data, int len_data) {
+static int cl_net_H_PACKET_SV_GAME_OVER(cl_state_t *client, void *data, int len_data) {
     UNUSED(len_data);
     int offset = sizeof(uint8_t);
     ServerMessage *msg = (ServerMessage *)(data + offset);
@@ -90,33 +90,33 @@ static int ClientNet_H_PACKET_SV_GAME_OVER(cl_state_t *client, void *data, int l
     return 0;
 }
 
-void ClientNet_InitHandlers() {
-    handlers[PACKET_SV_WELCOME] = ClientNet_H_PACKET_SV_WELCOME;
-    handlers[PACKET_SV_FULL] = ClientNet_H_PACKET_SV_FULL;
-    handlers[PACKET_SV_WAITING] = ClientNet_H_NOOP;
-    handlers[PACKET_SV_START] = ClientNet_H_PACKET_SV_START;
-    handlers[PACKET_SV_DISCONNECT] = ClientNet_H_PACKET_SV_DISCONNECT;
-    handlers[PACKET_SV_MESSAGE] = ClientNet_H_PACKET_SV_MESSAGE;
-    handlers[PACKET_CL_MESSAGE] = ClientNet_H_NOOP;
-    handlers[SVMSG_GAME_OVER] = ClientNet_H_PACKET_SV_GAME_OVER;
+void cl_net_InitHandlers() {
+    handlers[PACKET_SV_WELCOME] = cl_net_H_PACKET_SV_WELCOME;
+    handlers[PACKET_SV_FULL] = cl_net_H_PACKET_SV_FULL;
+    handlers[PACKET_SV_WAITING] = cl_net_H_NOOP;
+    handlers[PACKET_SV_START] = cl_net_H_PACKET_SV_START;
+    handlers[PACKET_SV_DISCONNECT] = cl_net_H_PACKET_SV_DISCONNECT;
+    handlers[PACKET_SV_MESSAGE] = cl_net_H_PACKET_SV_MESSAGE;
+    handlers[PACKET_CL_MESSAGE] = cl_net_H_NOOP;
+    handlers[SVMSG_GAME_OVER] = cl_net_H_PACKET_SV_GAME_OVER;
     for (int i = PACKET_FAKE_MAX; i < 256; i++) {
-        handlers[i] = ClientNet_H_NOOP;
+        handlers[i] = cl_net_H_NOOP;
     }
 }
 
-int ClientNet_RecvFromServer(cl_state_t *game, int timeout) {
-    int active_socket = SDLNet_CheckSockets(game->server_socket_set, timeout);
+int cl_net_RecvFromServer(cl_state_t *client, int timeout) {
+    int active_socket = SDLNet_CheckSockets(client->server_socket_set, timeout);
     if (active_socket) {
         char buffer[4096];
-        int num_bytes_received = SDLNet_TCP_Recv(game->server_socket, buffer, sizeof(buffer));
+        int num_bytes_received = SDLNet_TCP_Recv(client->server_socket, buffer, sizeof(buffer));
         uint8_t packet_id = *(uint8_t *)buffer;
-        int done = handlers[packet_id](game, buffer, num_bytes_received);
+        int done = handlers[packet_id](client, buffer, num_bytes_received);
         return done;
     }
     return 0;
 }
 
-void ClientNet_InitSockets(cl_state_t *client, char *ip_addr) {
+void cl_net_InitSockets(cl_state_t *client, char *ip_addr) {
     // Networking init
     if (SDLNet_Init() < 0) {
         Debug_Error("SDLNet_Init failed: %s", SDLNet_GetError());
@@ -146,7 +146,7 @@ void ClientNet_InitSockets(cl_state_t *client, char *ip_addr) {
     Debug_Info("Connected to server with IP %s port %d", ip_char, ip.port);
 }
 
-void ClientNet_SendActions(cl_state_t *client, PlayerActions actions) {
+void cl_net_SendActions(cl_state_t *client, PlayerActions actions) {
     static uint32_t sequence = 0;
 
     ClientMessage cl_msg;
@@ -159,7 +159,7 @@ void ClientNet_SendActions(cl_state_t *client, PlayerActions actions) {
     NetProtocol_SendPacketToServer(client->server_socket, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
 }
 
-void ClientNet_SendThrow(cl_state_t *client, float angle, float power, int type) {
+void cl_net_SendThrow(TCPsocket server, float angle, float power, int type) {
     static uint32_t sequence = 0;
 
     ClientMessage cl_msg;
@@ -170,5 +170,5 @@ void ClientNet_SendThrow(cl_state_t *client, float angle, float power, int type)
     cl_msg.data.projectile_throw.power = power;
     cl_msg.data.projectile_throw.type = type;
 
-    NetProtocol_SendPacketToServer(client->server_socket, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
+    NetProtocol_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
 }

@@ -1,15 +1,31 @@
 #include <SDL2/SDL2_gfxPrimitives.h> // boxRGBA
+#include <SDL2/SDL_net.h>
 
 #include "cl_char.h"
-#include "../shared/core_projectile.h"
 #include "cl_net.h"
+#include "cl_input.h"
 #include "cl_types.h"
 
-void ClientChar_Update(cl_state_t *client) {
-    ClientChar_ShootingHandler(client);
+void cl_char_Init(cl_char_t *cl_char, cl_player_t *cl_player, TCPsocket server) {
+    cl_char->id = cl_player->state->id;
+    cl_char->player = cl_player;
+    cl_input_InitKeys(&cl_char->input);
+    cl_char->angle = 0;
+    cl_char->angle_render = 0;
+    cl_char->throwing = 0;
+    cl_char->power = 0;
+    cl_char->change_arm_timer = 0;
+    cl_char->curr_arm = 0;
+    cl_char->projectile_timer = 0;
+    cl_char->server = server;
 }
 
-void ClientChar_RenderPowerGauge(cl_char_t *cl_char, SDL_Renderer *renderer) {
+
+void cl_char_Update(cl_char_t *cl_char) {
+    cl_char_ShootingHandler(cl_char);
+}
+
+void cl_char_RenderPowerGauge(cl_char_t *cl_char, SDL_Renderer *renderer) {
     PlayerState *p = cl_char->player->state;
     int gauge_x = p->x - p->w/2;
     int gauge_y = p->y - p->w/2;  // Above the visor
@@ -69,7 +85,7 @@ void ClientChar_RenderPowerGauge(cl_char_t *cl_char, SDL_Renderer *renderer) {
     }
 }
 
-void ClientChar_RenderAngle(cl_char_t *cl_char, SDL_Renderer *renderer) {
+void cl_char_RenderAngle(cl_char_t *cl_char, SDL_Renderer *renderer) {
     cl_player_t *cl_p = cl_char->player;
     PlayerState *p = cl_char->player->state;
     if (p->alive) {
@@ -96,8 +112,7 @@ void ClientChar_RenderAngle(cl_char_t *cl_char, SDL_Renderer *renderer) {
     }
 }
 
-void ClientChar_ShootingHandler(cl_state_t *client) {
-    cl_char_t *cl_char = &client->cl_char;
+void cl_char_ShootingHandler(cl_char_t *cl_char) {
     // 1. Handle aiming (doesn't affect movement)
     if (cl_char->input.up) {
         cl_char->angle += (3/360.0) * 2 * CONST_PI;
@@ -141,7 +156,7 @@ void ClientChar_ShootingHandler(cl_state_t *client) {
                 cl_char->power = MIN(cl_char->power, MAX_POWER);
             }
             else {  /* BUTTON RELEASED, THROW! */
-                ClientNet_SendThrow(client, cl_char->angle_render, cl_char->power, cl_char->curr_arm);
+                cl_net_SendThrow(cl_char->server, cl_char->angle_render, cl_char->power, cl_char->curr_arm);
 
                 // REMOVE these lines - they're creating local projectiles:
                 // int center_x = p->x + p->w/2;

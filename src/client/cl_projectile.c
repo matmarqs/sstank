@@ -4,7 +4,8 @@
 #include "cl_projectile.h"
 #include "../shared/core_projectile.h"
 
-int ClientProjectile_Load(cl_projectile_sys_t *cl_ps, SDL_Renderer *renderer) {
+int cl_projectile_Load(cl_projectile_sys_t *cl_ps, ProjectileSystem *ps, SDL_Renderer *renderer) {
+    cl_ps->sys = ps;
     cl_ps->sprites[0] = IMG_LoadTexture(renderer, "assets/img/toppng.com-bombs-1668x1686.png");
     if (!cl_ps->sprites[0]) {
         Debug_Error("Bomb sprite not found");
@@ -27,7 +28,7 @@ int ClientProjectile_Load(cl_projectile_sys_t *cl_ps, SDL_Renderer *renderer) {
     return SUCCESS;
 }
 
-void ClientProjectile_Throw(cl_projectile_sys_t *ps, int type, float x, float y,
+void cl_projectile_Throw(cl_projectile_sys_t *ps, int type, float x, float y,
                             float angle, float power, int owner) {
     ProjectileSystem *sys = ps->sys;
     int i = Projectile_Throw(sys, type, x, y, angle, power, owner);
@@ -39,7 +40,7 @@ void ClientProjectile_Throw(cl_projectile_sys_t *ps, int type, float x, float y,
     }
 }
 
-void ClientProjectile_Update(cl_projectile_sys_t *ps, GameState *game) {
+void cl_projectile_Update(cl_projectile_sys_t *ps, GameState *game) {
     Projectile_Update(ps->sys, game);
 
     /* Client only projectile control properties */
@@ -64,7 +65,7 @@ void ClientProjectile_Update(cl_projectile_sys_t *ps, GameState *game) {
     }
 }
 
-void ClientProjectile_Render(cl_projectile_sys_t *ps, SDL_Renderer *renderer) {
+void cl_projectile_Render(cl_projectile_sys_t *ps, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->sys->projectiles[i];
         cl_projectile_control_t *control = &ps->control[i];
@@ -98,7 +99,7 @@ void ClientProjectile_Render(cl_projectile_sys_t *ps, SDL_Renderer *renderer) {
     }
 }
 
-void ClientProjectile_Clean(cl_projectile_sys_t *cl_ps) {
+void cl_projectile_Clean(cl_projectile_sys_t *cl_ps) {
     for (int i = 0; i < PROJECTILE_NUM_SPRITES; i++) {
         if (cl_ps->sprites[i]) {
             SDL_DestroyTexture(cl_ps->sprites[i]);

@@ -3,8 +3,8 @@
 
 #include "cl_types.h"
 
-void Input_InitKeys(Input *input);
-int Input_SetEvents(SDL_Event *ev, Input *input);
-PlayerActions Input_GetActions(Input *raw);
+void cl_input_InitKeys(cl_input_t *input);
+int cl_input_SetEvents(SDL_Event *ev, cl_input_t *input);
+PlayerActions cl_input_GetActions(cl_input_t *raw);
 
 #endif
