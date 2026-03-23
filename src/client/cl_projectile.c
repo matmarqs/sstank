@@ -19,12 +19,10 @@ int cl_projectile_Load(cl_projectile_sys_t *cl_ps, ProjectileSystem *ps, SDL_Ren
     for (int i = 2; i < PROJECTILE_NUM_SPRITES; i++) {
         cl_ps->sprites[i] = NULL;
     }
-
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         cl_ps->control[i].angle = 0;
         cl_ps->control[i].facing_left = 0;
     }
-
     return SUCCESS;
 }
 
@@ -42,12 +40,11 @@ void cl_projectile_Throw(cl_projectile_sys_t *ps, int type, float x, float y,
 
 void cl_projectile_Update(cl_projectile_sys_t *ps, GameState *game) {
     Projectile_Update(ps->sys, game);
-
     /* Client only projectile control properties */
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->sys->projectiles[i];
         if (p->state == PROJECTILE_INACTIVE) continue;
-
+        // control properties (such as angle) are for rendering
         cl_projectile_control_t *control = &ps->control[i];
         if (p->type == 0) {
             // Update rotation based on velocity
@@ -68,10 +65,7 @@ void cl_projectile_Update(cl_projectile_sys_t *ps, GameState *game) {
 void cl_projectile_Render(cl_projectile_sys_t *ps, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->sys->projectiles[i];
-        cl_projectile_control_t *control = &ps->control[i];
-
         if (p->state == PROJECTILE_INACTIVE) continue;
-
         if (p->state == PROJECTILE_EXPLODING) {
             // Draw explosion
             int radius = BOMB_RADIUS + (10 - p->explosion_timer);
@@ -85,8 +79,8 @@ void cl_projectile_Render(cl_projectile_sys_t *ps, SDL_Renderer *renderer) {
             }
             continue;
         }
-
         // Draw active projectile
+        cl_projectile_control_t *control = &ps->control[i];
         SDL_Rect rect = { p->x, p->y, p->w, p->h };
         if (p->type == 0) {
             SDL_RenderCopyEx(renderer, ps->sprites[p->type], NULL, &rect,

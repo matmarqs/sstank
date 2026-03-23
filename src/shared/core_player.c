@@ -1,5 +1,3 @@
-#include "base.h"
-
 #include "core_player.h"
 #include "core_physics.h" // Physics_DeterminePlayerState
 
@@ -38,10 +36,10 @@ void Player_MovementHandler(PlayerState *p, GameState *game, PlayerActions actio
     PlayerMoveState state = Physics_DeterminePlayerState(&game->terrain, p);
     switch (state) {
         case GROUNDED:
-            Physics_UpdateGrounded(&game->terrain, p, dx);
+            Physics_UpdateGrounded(&game->terrain, p, dx, dt);
             break;
         case FALLING:
-            Physics_UpdateFalling(&game->terrain, p, dx);
+            Physics_UpdateFalling(&game->terrain, p, dx, dt);
             break;
         default:
             break;

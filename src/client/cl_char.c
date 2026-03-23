@@ -129,23 +129,22 @@ void cl_char_ShootingHandler(cl_char_t *cl_char) {
         cl_char->angle -= (3/360.0) * 2 * CONST_PI;
         if (cl_char->angle < 0) cl_char->angle = 0;
     }
+    // flip angle if facing right or left
     cl_char->angle_render =
         cl_char->player->state->facing_right ? cl_char->angle : CONST_PI - cl_char->angle;
-
     // 2. Handle throwing
     cl_char->projectile_timer--;
     if (cl_char->projectile_timer <= 0)
         cl_char->projectile_timer = 0;
-
+    // change weapon timer
     if (!cl_char->change_arm_timer) {
         if (cl_char->input.change_arm) {
             cl_char->change_arm_timer = 15;
             cl_char->curr_arm = (cl_char->curr_arm + 1) % 2;
         }
     }
-
+    // shoot when hold button is released
     int holding_throw = cl_char->input.shoot;
-
     if (!cl_char->projectile_timer) { /* timer has to be zero */
         if (!cl_char->throwing) { /* NOT THROWING, CAN BEGIN THROWING */
             if (holding_throw) {
@@ -162,17 +161,6 @@ void cl_char_ShootingHandler(cl_char_t *cl_char) {
                 cl_char->projectile_timer = 30;
                 cl_char->throwing = 0;
                 cl_char->power = 0;
-                // REMOVE these lines - they're creating local projectiles:
-                // int center_x = p->x + p->w/2;
-                // int center_y = p->y + p->h/2;
-                // float dx = p->x - center_x;
-                // float dy = p->y - center_y;
-                // float radius = sqrt(dx*dx + dy*dy);
-                // float start_x = center_x + radius * cos(cl_char->angle_render);
-                // float start_y = center_y + radius * (-sin(cl_char->angle_render));
-                // Projectile_Throw(&game->projectile_sys, cl_char->curr_arm,
-                //                  start_x, start_y, cl_char->angle_render, cl_char->power, cl_char->id);
-                // cl_char->projectile_timer = 30;
             }
         }
     }

@@ -25,19 +25,19 @@ PlayerMoveState Physics_DeterminePlayerState(Terrain *terr, PlayerState *p) {
     return (left_ground || right_ground) ? GROUNDED : FALLING;
 }
 
-void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float dx) {
+void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float vx, float dt) {
     // No input? nothing to do
-    if (dx == 0) {
+    if (vx == 0) {
         p->vx = 0;
         return;
     }
     // Try to move horizontally
-    float new_x = p->x + dx;
+    float new_x = p->x + vx / 60.0 * dt;
     // Check if we can stand at new position
     if (!Physics_CheckCollision(terr, new_x, p->y, p->w, p->h)) {
         // Free space? Just move there
         p->x = new_x;
-        p->vx = dx;
+        p->vx = vx;
         return;
     }
     // Can't move straight? Try stepping up (max 20 pixels)
@@ -45,7 +45,7 @@ void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float dx) {
         float try_y = p->y - step;
         if (!Physics_CheckCollision(terr, new_x, try_y, p->w, p->h)) {
             p->x = new_x;
-            p->vx = dx;
+            p->vx = vx;
             p->y = try_y;
             return;
         }
@@ -54,13 +54,13 @@ void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float dx) {
     p->vx = 0;
 }
 
-void Physics_UpdateFalling(Terrain *terr, PlayerState *p, float input_vx) {
+void Physics_UpdateFalling(Terrain *terr, PlayerState *p, float vx, float dt) {
     // Apply gravity (max fall speed)
     p->vy += GRAVITY / 60.0f;
 
     // Apply horizontal movement
-    p->vx = input_vx / 60.0f;
-    float new_x = p->x + p->vx;
+    p->vx = vx / 60.0f;
+    float new_x = p->x + p->vx * dt;
 
     if (p->vx != 0 && !Physics_CheckCollision(terr, new_x, p->y, p->w, p->h)) {
         p->x = new_x;

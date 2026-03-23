@@ -47,21 +47,17 @@ static int CircleRectCollision(float circle_x, float circle_y, float radius,
     // Find closest point on rectangle to circle
     float closestruct_x = fmax(rect_x, fmin(circle_x, rect_x + rect_w));
     float closestruct_y = fmax(rect_y, fmin(circle_y, rect_y + rect_h));
-
     // Calculate distance from circle center to this closest point
     float dx = circle_x - closestruct_x;
     float dy = circle_y - closestruct_y;
     float distruct_sq = dx*dx + dy*dy;
-
     return distruct_sq <= radius * radius;
 }
 
 void Projectile_Update(ProjectileSystem *ps, GameState *game) {
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->projectiles[i];
-
         if (p->state == PROJECTILE_INACTIVE) continue;
-
         if (p->state == PROJECTILE_EXPLODING) {
             p->explosion_timer--;
             if (p->explosion_timer <= 0) {
@@ -70,12 +66,10 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
             }
             continue;
         }
-
         // Physics update
         p->x += p->vx / 60;
         p->y += p->vy / 60;
         p->vy += GRAVITY / 60;
-
         // Collision
         if (p->x < -p->w || p->x > game->w || p->y > game->h) {
             p->state = PROJECTILE_INACTIVE;
