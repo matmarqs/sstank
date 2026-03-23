@@ -2,9 +2,8 @@
 
 #include "../shared/net_protocol.h"
 #include "cl_player.h"
-#include "../shared/core_projectile.h"
-#include "../shared/core_terrain.h"
-#include "../shared/net_util.h"
+#include "cl_projectile.h"
+#include "cl_terrain.h"
 
 static cl_net_Handler handlers[256];
 
@@ -60,33 +59,24 @@ static int cl_net_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len_da
                                     packet.data.player_health.health);
             break;
         case SVMSG_PROJECTILE_NEW:
-            Projectile_Throw(&game->projectile_sys, packet.data.projectile_new.type,
+            cl_projectile_Throw(&client->cl_projectile_sys, packet.data.projectile_new.type,
                              packet.data.projectile_new.x, packet.data.projectile_new.y,
                              packet.data.projectile_new.angle, packet.data.projectile_new.power,
-                             packet.data.projectile_new.id);
+                             packet.data.projectile_new.owner_id);
             break;
         case SVMSG_TERRAIN_DESTROY:
-            Terrain_DestroyCircle(&game->terrain,
+            cl_terrain_DestroyCircle(&client->cl_terrain,
                                   packet.data.terrain_destroy.x, packet.data.terrain_destroy.y,
                                   packet.data.terrain_destroy.radius);
             client->cl_terrain.dirty = 1;
             break;
         case SVMSG_GAME_OVER:
-            client->game_over = 1;
-            Debug_Info("Game Over! Player %d wins!", packet.data.game_winner.winner);
+            Debug_Info("Game Over! Player %d wins!", packet.data.game_over.winner);
+            return 1;
             break;
         default:
             break;
     }
-    return 0;
-}
-
-static int cl_net_H_PACKET_SV_GAME_OVER(cl_state_t *client, void *data, int len_data) {
-    UNUSED(len_data);
-    int offset = sizeof(uint8_t);
-    ServerMessage *msg = (ServerMessage *)(data + offset);
-    Debug_Info("Game Over! Player %d wins!", msg->data.game_winner.winner);
-    client->game_over = 1;
     return 0;
 }
 
@@ -98,7 +88,6 @@ void cl_net_InitHandlers() {
     handlers[PACKET_SV_DISCONNECT] = cl_net_H_PACKET_SV_DISCONNECT;
     handlers[PACKET_SV_MESSAGE] = cl_net_H_PACKET_SV_MESSAGE;
     handlers[PACKET_CL_MESSAGE] = cl_net_H_NOOP;
-    handlers[SVMSG_GAME_OVER] = cl_net_H_PACKET_SV_GAME_OVER;
     for (int i = PACKET_FAKE_MAX; i < 256; i++) {
         handlers[i] = cl_net_H_NOOP;
     }
@@ -122,53 +111,39 @@ void cl_net_InitSockets(cl_state_t *client, char *ip_addr) {
         Debug_Error("SDLNet_Init failed: %s", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, ip_addr, SERVER_PORT)) {
         Debug_Error("SDLNet_ResolveHost failed: %s", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-
     client->server_socket = SDLNet_TCP_Open(&ip);
     if (!client->server_socket) {
         Debug_Error("SDLNet_TCP_Open failed: %s", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-
     client->server_socket_set = SDLNet_AllocSocketSet(1);
     if (!client->server_socket_set) {
         if (client->server_socket) SDLNet_TCP_Close(client->server_socket);
     }
     SDLNet_TCP_AddSocket(client->server_socket_set, client->server_socket);
-
-    char ip_char[16];
-    NetUtil_IPint32ToChar(ip.host, ip_char);
-    Debug_Info("Connected to server with IP %s port %d", ip_char, ip.port);
+    Debug_Info("Connected to server with IP %s port %d", ip_addr, ip.port);
 }
 
-void cl_net_SendActions(cl_state_t *client, PlayerActions actions) {
-    static uint32_t sequence = 0;
-
+void cl_net_SendMovement(TCPsocket server, PlayerActions actions) {
     ClientMessage cl_msg;
-    cl_msg.type = CLMSG_PLAYER_INPUT;
-    cl_msg.sequence = sequence++;
+    cl_msg.type = CLMSG_PLAYER_MOVE;
     cl_msg.timestamp = SDL_GetTicks();
-    cl_msg.data.player_input.left = actions.move_left;
-    cl_msg.data.player_input.right = actions.move_right;
-
-    NetProtocol_SendPacketToServer(client->server_socket, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
+    cl_msg.data.player_move.left = actions.move_left;
+    cl_msg.data.player_move.right = actions.move_right;
+    NetProtocol_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
 }
 
 void cl_net_SendThrow(TCPsocket server, float angle, float power, int type) {
-    static uint32_t sequence = 0;
-
     ClientMessage cl_msg;
     cl_msg.type = CLMSG_PLAYER_THROW;
-    cl_msg.sequence = sequence++;
     cl_msg.timestamp = SDL_GetTicks();
+    cl_msg.data.projectile_throw.type = type;
     cl_msg.data.projectile_throw.angle = angle;
     cl_msg.data.projectile_throw.power = power;
-    cl_msg.data.projectile_throw.type = type;
-
     NetProtocol_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
 }

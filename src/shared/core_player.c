@@ -25,32 +25,27 @@ void Player_Teleport(PlayerState *p, float x, float y) {
 }
 
 void Player_MovementHandler(PlayerState *p, GameState *game, PlayerActions actions, float dt) {
-    UNUSED(dt);
-
-    float input_vx = 0;
+    float dx = 0;
     if (actions.move_left && !actions.move_right) {
-        input_vx = -PLAYER_SPEED;
+        dx = -PLAYER_SPEED * dt;
         p->facing_right = FALSE;
     }
     else if (!actions.move_left && actions.move_right) {
-        input_vx = PLAYER_SPEED;
+        dx = PLAYER_SPEED * dt;
         p->facing_right = TRUE;
     }
-
     // Determine state and update
     PlayerMoveState state = Physics_DeterminePlayerState(&game->terrain, p);
-
     switch (state) {
         case GROUNDED:
-            Physics_UpdateGrounded(&game->terrain, p, input_vx);
+            Physics_UpdateGrounded(&game->terrain, p, dx);
             break;
         case FALLING:
-            Physics_UpdateFalling(&game->terrain, p, input_vx);
+            Physics_UpdateFalling(&game->terrain, p, dx);
             break;
         default:
             break;
     }
-
     // World bounds
     if (p->x < 0) p->x = 0;
     if (p->x > WORLD_WIDTH - p->w) p->x = WORLD_WIDTH - p->w;

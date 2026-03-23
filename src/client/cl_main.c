@@ -48,18 +48,9 @@ int cl__Update(cl_state_t *client) {
     game->time++;
 
     // Get input from SDL events
-    int quit_local = cl_input_SetEvents(&client->event, &client->cl_char.input);
+    int quit_local = cl_input_GetEvents(&client->event, &client->cl_char.input);
 
     cl_char_Update(&client->cl_char);
-
-    // Convert raw input to actions
-    PlayerActions actions = {
-        .move_left = client->cl_char.input.left,
-        .move_right = client->cl_char.input.right,
-    };
-
-    // Send actions to server
-    cl_net_SendActions(client, actions);
 
     // Receive world state from server
     // Update local game state with server data

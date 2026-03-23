@@ -2,6 +2,7 @@
 
 #include "cl_terrain.h"
 #include "../shared/core_terrain.h"
+#include "cl_types.h"
 
 void cl_terrain_Clean(cl_terrain_t *cl_terr) {
     if (cl_terr->render_texture) SDL_DestroyTexture(cl_terr->render_texture);
@@ -54,6 +55,10 @@ int cl_terrain_Load(cl_terrain_t *cl_terr, char *bg_path, char *fg_path) {
     SDL_FreeSurface(fg_surface);
 
     return SUCCESS;
+}
+
+void cl_terrain_DestroyCircle(cl_terrain_t *cl_terr, float cx, float cy, float radius) {
+    Terrain_DestroyCircle(cl_terr->terrain, cx, cy, radius);
 }
 
 void cl_terrain_UpdateTexture(cl_terrain_t *cl_terr) {

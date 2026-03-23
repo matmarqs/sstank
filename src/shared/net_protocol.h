@@ -25,36 +25,33 @@ enum {
 
 typedef struct {
     uint8_t type;
-    uint32_t sequence;
     union {
         struct { uint8_t id; float x; float y; } player_pos;
         struct { uint8_t id; float health; } player_health;
-        struct { uint8_t id; float x, y, angle, power; int type; } projectile_new;
+        struct { uint8_t owner_id; float x, y, angle, power; int type; } projectile_new;
         struct { float x, y; float radius; } terrain_destroy;
-        struct { int winner; } game_winner;
+        struct { int winner; } game_over;
     } data;
 } ServerMessage;
 
 enum {
-    CLMSG_PLAYER_INPUT,
+    CLMSG_PLAYER_MOVE,
     CLMSG_PLAYER_THROW,
 };
 
 typedef struct {
     uint8_t type;
-    uint32_t sequence;
     uint32_t timestamp;
     union {
-        struct { uint8_t left, right; } player_input;
-        struct { float angle, power; int type; } projectile_throw;
+        struct { uint8_t left, right; } player_move;
+        struct { int type; float angle, power;} projectile_throw;
     } data;
 } ClientMessage;
 
 typedef struct {
-    TCPsocket socket;
     int id;
     int active;
-    uint32_t last_input_seq;
+    TCPsocket socket;
 } Client;
 
 void NetProtocol_SendPacketToClient(Client *client, uint8_t packet_id, void *data, int len_data);

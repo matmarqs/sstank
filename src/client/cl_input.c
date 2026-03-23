@@ -5,13 +5,13 @@ void cl_input_InitKeys(cl_input_t *input) {
     input->right = input->shoot = input->change_arm = FALSE;
 }
 
-int cl_input_SetEvents(SDL_Event *ev, cl_input_t *input) {
-    int done = FALSE;
+int cl_input_GetEvents(SDL_Event *ev, cl_input_t *input) {
+    int quit = FALSE;
 
     while (SDL_PollEvent(ev)) {
         switch(ev->type) {
             case SDL_QUIT:
-                done = TRUE;
+                quit = TRUE;
                 break;
 
             case SDL_KEYDOWN:
@@ -43,7 +43,7 @@ int cl_input_SetEvents(SDL_Event *ev, cl_input_t *input) {
         }
     }
 
-    return done;
+    return quit;
 }
 
 PlayerActions cl_input_GetActions(cl_input_t *raw) {
