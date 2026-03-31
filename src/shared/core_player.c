@@ -25,11 +25,11 @@ void Player_Teleport(PlayerState *p, float x, float y) {
 void Player_MovementHandler(PlayerState *p, GameState *game, PlayerActions actions, float dt) {
     float dx = 0;
     if (actions.move_left && !actions.move_right) {
-        dx = -PLAYER_SPEED * dt;
+        dx = -PLAYER_SPEED;
         p->facing_right = FALSE;
     }
     else if (!actions.move_left && actions.move_right) {
-        dx = PLAYER_SPEED * dt;
+        dx = PLAYER_SPEED;
         p->facing_right = TRUE;
     }
     // Determine state and update

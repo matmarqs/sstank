@@ -1,3 +1,4 @@
+#include <math.h>
 #include "base.h"
 #include "core_physics.h"
 #include "core_terrain.h" // Terrain_IsSolid
@@ -88,4 +89,17 @@ void Physics_UpdateFalling(Terrain *terr, PlayerState *p, float vx, float dt) {
     } else {
         p->y = new_y;
     }
+}
+
+// Check if circle (explosion) intersects rectangle (player)
+int Physics_CircleRectCollision(float circle_x, float circle_y, float radius,
+                        float rect_x, float rect_y, float rect_w, float rect_h) {
+    // Find closest point on rectangle to circle
+    float closestruct_x = fmax(rect_x, fmin(circle_x, rect_x + rect_w));
+    float closestruct_y = fmax(rect_y, fmin(circle_y, rect_y + rect_h));
+    // Calculate distance from circle center to this closest point
+    float dx = circle_x - closestruct_x;
+    float dy = circle_y - closestruct_y;
+    float distruct_sq = dx*dx + dy*dy;
+    return distruct_sq <= radius * radius;
 }

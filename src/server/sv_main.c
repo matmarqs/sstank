@@ -1,11 +1,10 @@
 #include "sv_main.h"
 #include "sv_cmd.h"
 #include "sv_net.h"
+#include "sv_logic.h"
 
 #include "../shared/core_game.h"
 #include "../shared/core_player.h"
-#include "../shared/core_projectile.h"
-#include <stdlib.h>
 
 void Server_Init(Server *server) {
     Server_InitNet(server);
@@ -15,22 +14,22 @@ void Server_Init(Server *server) {
     Debug_Info("Server initialized");
 }
 
-void sv_cmd_SendPositions(Server *server) {
-    // Send player positions
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        ServerMessage sv_msg;
-        sv_msg.type = SVMSG_PLAYER_POS;
-        sv_msg.data.player_pos.id = i;
-        sv_msg.data.player_pos.x = server->game.players[i].x;
-        sv_msg.data.player_pos.y = server->game.players[i].y;
-        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
-        // Send health separately
-        sv_msg.type = SVMSG_PLAYER_HEALTH;
-        sv_msg.data.player_health.id = i;
-        sv_msg.data.player_health.health = server->game.players[i].health;
-        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
-    }
-}
+//void sv_cmd_SendPositions(Server *server) {
+//    // Send player positions
+//    for (int i = 0; i < MAX_CLIENTS; i++) {
+//        ServerMessage sv_msg;
+//        sv_msg.type = SVMSG_PLAYER_POS;
+//        sv_msg.data.player_pos.id = i;
+//        sv_msg.data.player_pos.x = server->game.players[i].x;
+//        sv_msg.data.player_pos.y = server->game.players[i].y;
+//        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
+//        // Send health separately
+//        sv_msg.type = SVMSG_PLAYER_HEALTH;
+//        sv_msg.data.player_health.id = i;
+//        sv_msg.data.player_health.health = server->game.players[i].health;
+//        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
+//    }
+//}
 
 void Server_HandleClientMessage(Server *server, int player_id, ClientMessage *cl_msg) {
     if (!server->game_running) return;
@@ -38,7 +37,6 @@ void Server_HandleClientMessage(Server *server, int player_id, ClientMessage *cl
     PlayerState *player = &server->game.players[player_id];
     uint32_t timestamp;
     PlayerActions actions;
-    int proj_id;
     switch (cl_msg->type) {
         case CLMSG_PLAYER_MOVE:
             // Apply movement with server authority
@@ -65,24 +63,10 @@ void Server_Update(Server *server) {
             server->game.players[i].throw_cooldown--;
         }
     }
+    // Broadcast server positions
+    sv_cmd_PlayerBroadcastPositions(server);
     // Update projectiles (server authoritative)
-    Projectile_Update(&server->game.projectile_sys, &server->game);
-    // Check for terrain destruction from explosions
-    for (int i = 0; i < MAX_PROJECTILES; i++) {
-        Projectile *p = &server->game.projectile_sys.projectiles[i];
-        if (p->state == PROJECTILE_EXPLODING && p->explosion_timer == 10) {  // Just exploded
-            float cx = p->x + p->w/2.0;
-            float cy = p->y + p->h/2.0;
-
-            // Broadcast terrain destruction to clients
-            ServerMessage sv_msg;
-            sv_msg.type = SVMSG_TERRAIN_DESTROY;
-            sv_msg.data.terrain_destroy.x = cx;
-            sv_msg.data.terrain_destroy.y = cy;
-            sv_msg.data.terrain_destroy.radius = BOMB_RADIUS;
-            Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
-        }
-    }
+    sv_logic_ProjectileUpdate(server);
     // Check win condition
     int alive_count = 0;
     int last_alive = -1;
@@ -130,10 +114,10 @@ void Server_Loop(Server *server) {
                             ClientMessage cl_msg = *(ClientMessage *)(buffer + 1);
                             Server_HandleClientMessage(server, i, &cl_msg);
                         }
-                        Server_Update(server);  // ACTUAL UPDATE OF THE SERVER
                     }
                 }
             }
+	    Server_Update(server);  // ACTUAL UPDATE OF THE SERVER
             if (!clients[0].active || !clients[1].active) {
                 Server_Broadcast(server, PACKET_SV_DISCONNECT, NULL, 0);
                 Debug_Info("Some player disconnected. Ending game!");

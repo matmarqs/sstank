@@ -1,48 +1,11 @@
-#include <SDL2/SDL_image.h> // IMG_LoadTexture
-#include <SDL2/SDL_render.h> // SDL_RenderCopyEx
-#include <SDL2/SDL2_gfxPrimitives.h> // filledCircleRGBA
-#include <math.h> // sin, cos
+#include "sv_cmd.h"
+#include "../shared/core_physics.h"
+#include "../shared/core_terrain.h"
+#include "../shared/core_player.h"
 
-#include "core_projectile.h"
-#include "core_player.h"
-#include "core_terrain.h"
-#include "core_physics.h"
-
-
-int Projectile_Load(ProjectileSystem *ps) {
-    for (int i = 0; i < MAX_PROJECTILES; i++) {
-        ps->projectiles[i].state = PROJECTILE_INACTIVE;
-    }
-    ps->count = 0;
-    return SUCCESS;
-}
-
-int Projectile_Throw(ProjectileSystem *ps, int type, float x, float y, float angle, float power, int owner) {
-    if (ps->count >= MAX_PROJECTILES) {
-        Debug_Warn("Maximum projectiles reached!");
-        return -1;
-    }
-    for (int i = 0; i < MAX_PROJECTILES; i++) {
-        if (ps->projectiles[i].state == PROJECTILE_INACTIVE) {
-            float speed = power * 5.0f;
-            ps->projectiles[i].type = type;
-            ps->projectiles[i].x = x - PROJECTILE_WIDTH / 2.0;
-            ps->projectiles[i].y = y - PROJECTILE_HEIGHT / 2.0;
-            ps->projectiles[i].vx = speed * cos(angle);
-            ps->projectiles[i].vy = -speed * sin(angle);    // y axis is inverted
-            ps->projectiles[i].w = PROJECTILE_WIDTH;
-            ps->projectiles[i].h = PROJECTILE_HEIGHT;
-            ps->projectiles[i].state = PROJECTILE_ACTIVE;
-            ps->projectiles[i].owner = owner;
-            ps->projectiles[i].explosion_timer = 0;
-            return i;
-        }
-    }
-    return -1;
-}
-
-
-void Projectile_Update(ProjectileSystem *ps, GameState *game) {
+void sv_logic_ProjectileUpdate(Server *server) {
+    GameState *game = &server->game;
+    ProjectileSystem *ps = &game->projectile_sys;
     for (int i = 0; i < MAX_PROJECTILES; i++) {
         Projectile *p = &ps->projectiles[i];
         if (p->state == PROJECTILE_INACTIVE) continue;
@@ -68,14 +31,16 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
             float cx = p->x + p->w/2.0;
             float cy = p->y + p->h/2.0;
             if (p->type == 0) {
-                Terrain_DestroyCircle(&game->terrain, cx, cy, BOMB_RADIUS);
+              Terrain_DestroyCircle(&game->terrain, cx, cy, BOMB_RADIUS);
+	      sv_cmd_TerrainDestroy(server, cx, cy, BOMB_RADIUS);
                 for (int i = 0; i < NUM_PLAYERS; i++) {
                     PlayerState *player = &game->players[i];
                     if (!player->alive) continue;
                     if (Physics_CircleRectCollision(cx, cy, BOMB_RADIUS,
                                             player->x, player->y, 
                                             player->w, player->h)) {
-                        player->health -= 20;
+                      player->health -= 20;
+		      sv_cmd_PlayerTakeDamage(server, player->id, player->health);
                     }
                 }
             }

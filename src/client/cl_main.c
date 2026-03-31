@@ -62,7 +62,7 @@ int cl__Update(cl_state_t *client) {
 
     // Update client-side rendering data
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        cl_player_Update(&client->cl_players[i], game, actions, 1/60.0);
+        cl_player_Update(&client->cl_players[i], game, cl_input_GetActions(&client->cl_char.input), 1/60.0);
     }
 
     return quit_local || quit_net || client->game_over;

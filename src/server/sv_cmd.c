@@ -34,3 +34,35 @@ int sv_cmd_PlayerShoot(Server *server, PlayerState *p, ProjectileSystem *ps,
     }
     return -1;
 }
+
+void sv_cmd_PlayerTakeDamage(Server *server, int player_id, float health) {
+  ServerMessage sv_msg;
+  sv_msg.type = SVMSG_PLAYER_HEALTH;
+  sv_msg.data.player_health.id = player_id;
+  sv_msg.data.player_health.health = health;
+  Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
+}
+
+void sv_cmd_PlayerBroadcastPositions(Server *server) {
+  if (server->game.time % 3 != 0)
+    return;
+  ServerMessage sv_msg;
+  for (int i = 0; i < NUM_PLAYERS; i++) {
+    PlayerState *p = &server->game.players[i];
+    sv_msg.type = SVMSG_PLAYER_POS;
+    sv_msg.data.player_pos.id = p->id;
+    sv_msg.data.player_pos.x = p->x;
+    sv_msg.data.player_pos.y = p->y;
+    Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
+  } 
+}
+
+void sv_cmd_TerrainDestroy(Server *server, float cx, float cy, float r) {
+  // Broadcast terrain destruction to clients
+  ServerMessage sv_msg;
+  sv_msg.type = SVMSG_TERRAIN_DESTROY;
+  sv_msg.data.terrain_destroy.x = cx;
+  sv_msg.data.terrain_destroy.y = cy;
+  sv_msg.data.terrain_destroy.radius = r;
+  Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
+}

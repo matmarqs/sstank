@@ -1,4 +1,5 @@
 #include "sv_net.h"
+#include <SDL2/SDL_net.h>
 
 void Server_Broadcast(Server *server, uint8_t packet_id, void *data, int len) {
     Client *clients = server->clients;
