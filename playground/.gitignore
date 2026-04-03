@@ -1,0 +1,16 @@
+# ignore these directories
+build/
+
+# emacs temp files
+**/\#*
+**/.\#*
+**/*~
+
+# binary or dependencies
+**/*.o
+**/*.elf
+**/*.d
+
+# clangd stuff
+compile_commands.json
+.cache/

@@ -1,0 +1,7 @@
+Diagnostics:
+  Suppress:
+    - unused-parameter
+    - missing-field-initializers
+
+Index:
+  Background: Builds
