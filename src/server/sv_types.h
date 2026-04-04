@@ -10,12 +10,12 @@
 #define TICK_TIME_MS (1000 / TICK_RATE)
 
 typedef struct {
-    Client clients[MAX_CLIENTS];
+    sv_client_t clients[MAX_CLIENTS];
     TCPsocket socket;
     SDLNet_SocketSet socket_set;
     GameState game;  // Server maintains authoritative game state
     int game_running;
     uint32_t last_tick;
-} Server;
+} sv_server_t;
 
 #endif

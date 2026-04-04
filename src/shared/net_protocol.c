@@ -1,7 +1,7 @@
 #include "base.h"
 #include "net_protocol.h"
 
-static void NetProtocol_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data, char *debug_string) {
+static void net_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data, char *debug_string) {
     char buffer[sizeof(uint8_t) + len_data];
     int offset = 0;
     buffer[offset] = packet_id;
@@ -13,17 +13,23 @@ static void NetProtocol_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, 
         size_to_send = size_to_copy + offset;
     }
     SDLNet_TCP_Send(socket_to_send, buffer, size_to_send);
-    Debug_HexDump(buffer, size_to_send, debug_string);
-}
-
-void NetProtocol_SendPacketToClient(Client *client, uint8_t packet_id, void *data, int len_data) {
-    if (client->active) {
-        char debug_string[100];
-        snprintf(debug_string, sizeof(debug_string), "Sent data to client %d", client->id);
-        NetProtocol_SendPacket(client->socket, packet_id, data, len_data, debug_string);
+    // debugging
+    static int last_time;
+    int current_time = SDL_GetTicks();
+    if (current_time - last_time > 1000) {
+        Debug_HexDump(buffer, size_to_send, debug_string);
+        last_time = current_time;
     }
 }
 
-void NetProtocol_SendPacketToServer(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data) {
-    NetProtocol_SendPacket(socket_to_send, packet_id, data, len_data, "Sent data to server");
+void net_SendPacketToClient(sv_client_t *client, uint8_t packet_id, void *data, int len_data) {
+    if (client->active) {
+        char debug_string[100];
+        snprintf(debug_string, sizeof(debug_string), "Sent data to client %d", client->id);
+        net_SendPacket(client->socket, packet_id, data, len_data, debug_string);
+    }
+}
+
+void net_SendPacketToServer(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data) {
+    net_SendPacket(socket_to_send, packet_id, data, len_data, "Sent data to server");
 }

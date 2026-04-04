@@ -3,8 +3,8 @@
 
 #include "sv_types.h"
 
-void Server_InitNet(Server *server);
-void Server_AcceptClients(Server *server);
-void Server_Broadcast(Server *server, uint8_t packet_id, void *data, int len);
+void sv_net_Init(sv_server_t *server);
+void sv_net_AcceptClients(sv_server_t *server);
+void sv_net_Broadcast(sv_server_t *server, uint8_t packet_id, void *data, int len);
 
 #endif

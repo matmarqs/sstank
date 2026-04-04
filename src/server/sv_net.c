@@ -1,16 +1,16 @@
 #include "sv_net.h"
 #include <SDL2/SDL_net.h>
 
-void Server_Broadcast(Server *server, uint8_t packet_id, void *data, int len) {
-    Client *clients = server->clients;
+void sv_net_Broadcast(sv_server_t *server, uint8_t packet_id, void *data, int len) {
+    sv_client_t *clients = server->clients;
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
-            NetProtocol_SendPacketToClient(&clients[i], packet_id, data, len);
+            net_SendPacketToClient(&clients[i], packet_id, data, len);
         }
     }
 }
 
-void Server_InitNet(Server *server) {
+void sv_net_Init(sv_server_t *server) {
     // Create socket
     if (SDLNet_Init() < 0) {
         Debug_Error("SDLNet_Init failed: %s", SDLNet_GetError());
@@ -39,11 +39,11 @@ void Server_InitNet(Server *server) {
     }
 }
 
-void Server_AcceptClients(Server *server) {
+void sv_net_AcceptClients(sv_server_t *server) {
     while (1) {
         // Check for new connection
         TCPsocket client_socket = SDLNet_TCP_Accept(server->socket);
-        Client *clients = server->clients;
+        sv_client_t *clients = server->clients;
         if (client_socket) {
             // Find free slot
             int slot = -1;
@@ -60,11 +60,11 @@ void Server_AcceptClients(Server *server) {
                 SDLNet_TCP_AddSocket(server->socket_set, client_socket);
                 Debug_Info("Client %d connected", slot);
                 // Send welcome with ID
-                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SV_WELCOME, &slot, 4);
+                net_SendPacketToClient(&clients[slot], PACKET_SV_WELCOME, &slot, 4);
             }
             else {
                 // Server full
-                NetProtocol_SendPacketToClient(&clients[slot], PACKET_SV_FULL, NULL, 0);
+                net_SendPacketToClient(&clients[slot], PACKET_SV_FULL, NULL, 0);
                 SDLNet_TCP_Close(client_socket);
             }
         }
@@ -84,13 +84,13 @@ void Server_AcceptClients(Server *server) {
                     }
                     else {
                         // Got data, but the other client is not ready yet.
-                        NetProtocol_SendPacketToClient(&clients[i], PACKET_SV_WAITING, NULL, 0);
+                        net_SendPacketToClient(&clients[i], PACKET_SV_WAITING, NULL, 0);
                     }
                 }
             }
         }
         if (clients[0].active && clients[1].active) {
-            Server_Broadcast(server, PACKET_SV_START, NULL, 0);
+            sv_net_Broadcast(server, PACKET_SV_START, NULL, 0);
             Debug_Info("Both clients connected! Starting game!");
             break;
         }

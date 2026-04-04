@@ -27,7 +27,7 @@ int cl_terrain_Init(cl_terrain_t *cl_terr, Terrain *terrain, SDL_Renderer *rende
         return FAILURE;
     }
 
-    cl_terr->dirty = 0;
+    cl_terr->dirty = 1;
 
     return SUCCESS;
 }

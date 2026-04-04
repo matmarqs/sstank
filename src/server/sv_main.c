@@ -6,56 +6,38 @@
 #include "../shared/core_game.h"
 #include "../shared/core_player.h"
 
-void Server_Init(Server *server) {
-    Server_InitNet(server);
+void sv__Init(sv_server_t *server) {
+    sv_net_Init(server);
     Game_Init(&server->game);
-    server->game_running = 0;
+    server->game_running = 1;
     server->last_tick = SDL_GetTicks();
     Debug_Info("Server initialized");
 }
 
-//void sv_cmd_SendPositions(Server *server) {
-//    // Send player positions
-//    for (int i = 0; i < MAX_CLIENTS; i++) {
-//        ServerMessage sv_msg;
-//        sv_msg.type = SVMSG_PLAYER_POS;
-//        sv_msg.data.player_pos.id = i;
-//        sv_msg.data.player_pos.x = server->game.players[i].x;
-//        sv_msg.data.player_pos.y = server->game.players[i].y;
-//        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
-//        // Send health separately
-//        sv_msg.type = SVMSG_PLAYER_HEALTH;
-//        sv_msg.data.player_health.id = i;
-//        sv_msg.data.player_health.health = server->game.players[i].health;
-//        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
-//    }
-//}
-
-void Server_HandleClientMessage(Server *server, int player_id, ClientMessage *cl_msg) {
+void sv__HandleClientMessage(sv_server_t *server, int player_id, cl_msg_t *cl_msg) {
+    Debug_HexDump(cl_msg, sizeof(cl_msg_t), "Received data from client %d", player_id);
     if (!server->game_running) return;
     if (player_id < 0 || player_id >= MAX_CLIENTS) return;
     PlayerState *player = &server->game.players[player_id];
-    uint32_t timestamp;
     PlayerActions actions;
     switch (cl_msg->type) {
-        case CLMSG_PLAYER_MOVE:
+        case CLMSG_MOVE:
             // Apply movement with server authority
-            timestamp = cl_msg->timestamp;
-            actions.move_left = cl_msg->data.player_move.left;
-            actions.move_right = cl_msg->data.player_move.right;
-            Player_MovementHandler(player, &server->game, actions, SDL_GetTicks()-timestamp);
+            actions.move_left = cl_msg->data.move.left;
+            actions.move_right = cl_msg->data.move.right;
+            Player_MovementHandler(player, &server->game, actions, 1/60.0f);
             break;
-        case CLMSG_PLAYER_THROW:
+        case CLMSG_PROJECTILE:
             // Create projectile on server
             sv_cmd_PlayerShoot(server, player, &server->game.projectile_sys,
-                               cl_msg->data.projectile_throw.type,
-                               cl_msg->data.projectile_throw.angle,
-                               cl_msg->data.projectile_throw.power);
+                               cl_msg->data.projectile.type,
+                               cl_msg->data.projectile.angle,
+                               cl_msg->data.projectile.power);
             break;
     }
 }
 
-void Server_Update(Server *server) {
+void sv__Update(sv_server_t *server) {
     if (!server->game_running) return;
     // Update cooldowns
     for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -76,22 +58,22 @@ void Server_Update(Server *server) {
             last_alive = i;
         }
     }
-    if (alive_count <= 1 && server->game_running) {
+    if (alive_count <= 1) {
         // Game over, broadcast winner
-        ServerMessage sv_msg;
+        sv_msg_t sv_msg;
         sv_msg.type = SVMSG_GAME_OVER;
         sv_msg.data.game_over.winner = last_alive;
-        Server_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(ServerMessage));
+        sv_net_Broadcast(server, PACKET_SV_MESSAGE, &sv_msg, sizeof(sv_msg_t));
         server->game_running = 0;
         Debug_Info("Game over! Winner: Player %d", last_alive);
-        Server_Broadcast(server, PACKET_SV_DISCONNECT, NULL, 0);
+        sv_net_Broadcast(server, PACKET_SV_DISCONNECT, NULL, 0);
     }
 }
 
 
-void Server_Loop(Server *server) {
+void sv__Loop(sv_server_t *server) {
     char buffer[1024];
-    Client *clients = server->clients;
+    sv_client_t *clients = server->clients;
     while (1) {
         // Check for activity
         int num_active_sockets = SDLNet_CheckSockets(server->socket_set, 50);
@@ -111,15 +93,16 @@ void Server_Loop(Server *server) {
                         // HERE WE PROCESS CLIENT INPUT
                         uint8_t packet_id = *(uint8_t *)buffer;
                         if (packet_id == PACKET_CL_MESSAGE) {
-                            ClientMessage cl_msg = *(ClientMessage *)(buffer + 1);
-                            Server_HandleClientMessage(server, i, &cl_msg);
+                            cl_msg_t cl_msg = *(cl_msg_t *)(buffer + 1);
+                            sv__HandleClientMessage(server, i, &cl_msg);
                         }
                     }
                 }
             }
-	    Server_Update(server);  // ACTUAL UPDATE OF THE SERVER
+            Debug_Info("UPDATING");
+            sv__Update(server);  // ACTUAL UPDATE OF THE SERVER
             if (!clients[0].active || !clients[1].active) {
-                Server_Broadcast(server, PACKET_SV_DISCONNECT, NULL, 0);
+                sv_net_Broadcast(server, PACKET_SV_DISCONNECT, NULL, 0);
                 Debug_Info("Some player disconnected. Ending game!");
                 break;
             }
@@ -127,8 +110,8 @@ void Server_Loop(Server *server) {
     }
 }
 
-void Server_Clean(Server *server, int exit_code) {
-    Client *clients = server->clients;
+void sv__Clean(sv_server_t *server, int exit_code) {
+    sv_client_t *clients = server->clients;
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
             SDLNet_TCP_Close(clients[i].socket);
@@ -144,10 +127,10 @@ void Server_Clean(Server *server, int exit_code) {
 int main(int argc, char *argv[]) {
     UNUSED(argc);
     UNUSED(argv);
-    Server server;
-    Server_Init(&server);
-    Server_AcceptClients(&server);
-    Server_Loop(&server);
-    Server_Clean(&server, EXIT_SUCCESS);
+    sv_server_t server;
+    sv__Init(&server);
+    sv_net_AcceptClients(&server);
+    sv__Loop(&server);
+    sv__Clean(&server, EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }

@@ -10,7 +10,7 @@ void Game_Init(GameState *game) {
     Terrain_Init(&game->terrain);
     Terrain_Load(&game->terrain, MAP_FG);
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        Player_Init(&game->players[i]);
+        Player_Init(&game->players[i], i);
     }
     Projectile_Load(&game->projectile_sys);
 }

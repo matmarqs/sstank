@@ -3,6 +3,6 @@
 
 #include "sv_types.h"
 
-void sv_logic_ProjectileUpdate(Server *server);
+void sv_logic_ProjectileUpdate(sv_server_t *server);
 
 #endif

@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
     /* game loop */
     int done = FALSE;
-    while (done) {
+    while (!done) {
         done = cl__Update(&client);
         cl__Render(&client);
         SDL_Delay(1000/60);
@@ -65,7 +65,7 @@ int cl__Update(cl_state_t *client) {
         cl_player_Update(&client->cl_players[i], game, cl_input_GetActions(&client->cl_char.input), 1/60.0);
     }
 
-    return quit_local || quit_net || client->game_over;
+    return quit_local || quit_net;
 }
 
 void cl__Render(cl_state_t *client) {

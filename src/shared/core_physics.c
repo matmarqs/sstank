@@ -4,6 +4,7 @@
 #include "core_terrain.h" // Terrain_IsSolid
 
 int Physics_CheckCollision(Terrain *terr, float x, float y, float w, float h) {
+    return 0;
     int min_x = MAX(0, (int)x);
     int max_x = MIN(terr->width - 1, (int)(x + w));
     int min_y = MAX(0, (int)y);
@@ -19,6 +20,7 @@ int Physics_CheckCollision(Terrain *terr, float x, float y, float w, float h) {
 }
 
 PlayerMoveState Physics_DeterminePlayerState(Terrain *terr, PlayerState *p) {
+    return GROUNDED;
     // Check both bottom corners for ground
     float feet_y = p->y + p->h;
     int left_ground = Terrain_IsSolid(terr, p->x, feet_y + 1);
@@ -27,11 +29,6 @@ PlayerMoveState Physics_DeterminePlayerState(Terrain *terr, PlayerState *p) {
 }
 
 void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float vx, float dt) {
-    // No input? nothing to do
-    if (vx == 0) {
-        p->vx = 0;
-        return;
-    }
     // Try to move horizontally
     float new_x = p->x + vx / 60.0 * dt;
     // Check if we can stand at new position

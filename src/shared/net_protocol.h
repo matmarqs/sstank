@@ -12,7 +12,6 @@ enum {
     PACKET_SV_DISCONNECT,
     PACKET_SV_MESSAGE,
     PACKET_CL_MESSAGE,
-    PACKET_FAKE_MAX,
 };
 
 enum {
@@ -32,29 +31,30 @@ typedef struct {
         struct { float x, y; float radius; } terrain_destroy;
         struct { int winner; } game_over;
     } data;
-} ServerMessage;
+} sv_msg_t;
 
 enum {
-    CLMSG_PLAYER_MOVE,
-    CLMSG_PLAYER_THROW,
+    CLMSG_MOVE,
+    CLMSG_PROJECTILE,
 };
 
 typedef struct {
     uint8_t type;
-    uint32_t timestamp;
     union {
-        struct { uint8_t left, right; } player_move;
-        struct { int type; float angle, power;} projectile_throw;
+        struct { uint8_t left, right; } move;
+        struct { int type; float angle, power;} projectile;
     } data;
-} ClientMessage;
+} cl_msg_t;
 
+#define EACH_CLIENT_MAX_MESSAGES 10
 typedef struct {
     int id;
     int active;
     TCPsocket socket;
-} Client;
+    struct { uint8_t pending; cl_msg_t content; } msgs[EACH_CLIENT_MAX_MESSAGES];
+} sv_client_t;
 
-void NetProtocol_SendPacketToClient(Client *client, uint8_t packet_id, void *data, int len_data);
-void NetProtocol_SendPacketToServer(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data);
+void net_SendPacketToClient(sv_client_t *client, uint8_t packet_id, void *data, int len_data);
+void net_SendPacketToServer(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data);
 
 #endif

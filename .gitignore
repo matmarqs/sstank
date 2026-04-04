@@ -12,5 +12,10 @@ references/
 # binary or dependencies
 **/*.o
 **/*.elf
+**/*.out
 **/*.exe
 **/*.d
+
+# clangd stuff
+compile_commands.json
+.cache/

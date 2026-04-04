@@ -57,7 +57,7 @@ typedef enum {
 
 typedef struct {
     int has_ground;
-    float ground_y;        // Y coordinate of ground below
+    float ground_y; // Y coordinate of ground below
 } GroundContact;
 
 typedef struct {

@@ -3,7 +3,7 @@
 #include "../shared/core_terrain.h"
 #include "../shared/core_player.h"
 
-void sv_logic_ProjectileUpdate(Server *server) {
+void sv_logic_ProjectileUpdate(sv_server_t *server) {
     GameState *game = &server->game;
     ProjectileSystem *ps = &game->projectile_sys;
     for (int i = 0; i < MAX_PROJECTILES; i++) {
@@ -31,8 +31,8 @@ void sv_logic_ProjectileUpdate(Server *server) {
             float cx = p->x + p->w/2.0;
             float cy = p->y + p->h/2.0;
             if (p->type == 0) {
-              Terrain_DestroyCircle(&game->terrain, cx, cy, BOMB_RADIUS);
-	      sv_cmd_TerrainDestroy(server, cx, cy, BOMB_RADIUS);
+                Terrain_DestroyCircle(&game->terrain, cx, cy, BOMB_RADIUS);
+                sv_cmd_TerrainDestroy(server, cx, cy, BOMB_RADIUS);
                 for (int i = 0; i < NUM_PLAYERS; i++) {
                     PlayerState *player = &game->players[i];
                     if (!player->alive) continue;
@@ -40,7 +40,7 @@ void sv_logic_ProjectileUpdate(Server *server) {
                                             player->x, player->y, 
                                             player->w, player->h)) {
                       player->health -= 20;
-		      sv_cmd_PlayerTakeDamage(server, player->id, player->health);
+                      sv_cmd_PlayerTakeDamage(server, player->id, player->health);
                     }
                 }
             }

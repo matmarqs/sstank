@@ -7,7 +7,20 @@
 
 static cl_net_Handler handlers[256];
 
+int packet_sizes[256] = {
+    [PACKET_SV_WELCOME] = 1 + sizeof(int), // 4 bytes (client id)
+    [PACKET_SV_FULL] = 1,
+    [PACKET_SV_WAITING] = 1,
+    [PACKET_SV_START] = 1,
+    [PACKET_SV_DISCONNECT] = 1,
+    [PACKET_SV_MESSAGE] = 1 + sizeof(sv_msg_t),
+    [PACKET_CL_MESSAGE] = 1 + sizeof(cl_msg_t),
+};
+
 static int cl_net_H_PACKET_SV_WELCOME(cl_state_t *client, void *data, int len_data) {
+    if (len_data != packet_sizes[PACKET_SV_WELCOME]) {
+        return 0;
+    }
     UNUSED(len_data);
     int offset = sizeof(uint8_t);
     client->my_player_id = *(int *)(data + offset);
@@ -44,10 +57,11 @@ static int cl_net_H_PACKET_SV_DISCONNECT(cl_state_t *client, void *data, int len
 }
 
 static int cl_net_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len_data) {
-    UNUSED(len_data);
+    if (len_data != packet_sizes[PACKET_SV_MESSAGE]) {
+        return 0;
+    }
     GameState *game = client->game;
-    int offset = sizeof(uint8_t);
-    ServerMessage packet = *(ServerMessage *)(data + offset);
+    sv_msg_t packet = *(sv_msg_t *)(data + 1);
     uint8_t type = packet.type;
     switch (type) {
         case SVMSG_PLAYER_POS:
@@ -81,26 +95,35 @@ static int cl_net_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len_da
 }
 
 void cl_net_InitHandlers() {
+    for (int i = 0; i < 256; i++) {
+        handlers[i] = cl_net_H_NOOP;
+    }
     handlers[PACKET_SV_WELCOME] = cl_net_H_PACKET_SV_WELCOME;
     handlers[PACKET_SV_FULL] = cl_net_H_PACKET_SV_FULL;
     handlers[PACKET_SV_WAITING] = cl_net_H_NOOP;
     handlers[PACKET_SV_START] = cl_net_H_PACKET_SV_START;
     handlers[PACKET_SV_DISCONNECT] = cl_net_H_PACKET_SV_DISCONNECT;
     handlers[PACKET_SV_MESSAGE] = cl_net_H_PACKET_SV_MESSAGE;
-    handlers[PACKET_CL_MESSAGE] = cl_net_H_NOOP;
-    for (int i = PACKET_FAKE_MAX; i < 256; i++) {
-        handlers[i] = cl_net_H_NOOP;
-    }
 }
 
 int cl_net_RecvFromServer(cl_state_t *client, int timeout) {
+    static int last_time;
     int active_socket = SDLNet_CheckSockets(client->server_socket_set, timeout);
     if (active_socket) {
         char buffer[4096];
         int num_bytes_received = SDLNet_TCP_Recv(client->server_socket, buffer, sizeof(buffer));
-        uint8_t packet_id = *(uint8_t *)buffer;
-        int done = handlers[packet_id](client, buffer, num_bytes_received);
-        return done;
+        if ((SDL_GetTicks() - last_time) > 1000) {
+            printf("num_bytes_received = %d\n", num_bytes_received);
+            last_time = SDL_GetTicks();
+        }
+        int offset = 0;
+        while (offset < num_bytes_received) {
+            uint8_t packet_id = *(uint8_t *)(buffer + offset);
+            if (num_bytes_received - offset < packet_sizes[packet_id]) break;
+            int done = handlers[packet_id](client, buffer + offset, packet_sizes[packet_id]);
+            if (done) return 1;
+            offset += packet_sizes[packet_id];
+        }
     }
     return 0;
 }
@@ -130,20 +153,18 @@ void cl_net_InitSockets(cl_state_t *client, char *ip_addr) {
 }
 
 void cl_net_SendMovement(TCPsocket server, PlayerActions actions) {
-    ClientMessage cl_msg;
-    cl_msg.type = CLMSG_PLAYER_MOVE;
-    cl_msg.timestamp = SDL_GetTicks();
-    cl_msg.data.player_move.left = actions.move_left;
-    cl_msg.data.player_move.right = actions.move_right;
-    NetProtocol_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
+    cl_msg_t cl_msg;
+    cl_msg.type = CLMSG_MOVE;
+    cl_msg.data.move.left = actions.move_left;
+    cl_msg.data.move.right = actions.move_right;
+    net_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(cl_msg_t));
 }
 
 void cl_net_SendThrow(TCPsocket server, float angle, float power, int type) {
-    ClientMessage cl_msg;
-    cl_msg.type = CLMSG_PLAYER_THROW;
-    cl_msg.timestamp = SDL_GetTicks();
-    cl_msg.data.projectile_throw.type = type;
-    cl_msg.data.projectile_throw.angle = angle;
-    cl_msg.data.projectile_throw.power = power;
-    NetProtocol_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(ClientMessage));
+    cl_msg_t cl_msg;
+    cl_msg.type = CLMSG_PROJECTILE;
+    cl_msg.data.projectile.type = type;
+    cl_msg.data.projectile.angle = angle;
+    cl_msg.data.projectile.power = power;
+    net_SendPacketToServer(server, PACKET_CL_MESSAGE, &cl_msg, sizeof(cl_msg_t));
 }

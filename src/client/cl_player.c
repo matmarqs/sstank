@@ -58,7 +58,7 @@ void cl_player_Update(cl_player_t *cl_player, GameState *game, PlayerActions act
         cl_player->state->alive = 0;
     }
     if (cl_player->state->alive) {
-        Player_MovementHandler(cl_player->state, game, actions, dt);
+        //Player_MovementHandler(cl_player->state, game, actions, dt);
         cl_player_AnimationHandler(cl_player, game);
     }
 }

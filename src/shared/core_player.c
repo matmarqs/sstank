@@ -1,7 +1,8 @@
 #include "core_player.h"
 #include "core_physics.h" // Physics_DeterminePlayerState
 
-void Player_Init(PlayerState *p) {
+void Player_Init(PlayerState *p, int player_id) {
+    p->id = player_id;
     p->w = BASE_PLAYER_WIDTH;
     p->h = BASE_PLAYER_HEIGHT;
     p->x = (WORLD_WIDTH - p->w) / 2.0;    /* start sprite center of screen */
@@ -23,23 +24,23 @@ void Player_Teleport(PlayerState *p, float x, float y) {
 }
 
 void Player_MovementHandler(PlayerState *p, GameState *game, PlayerActions actions, float dt) {
-    float dx = 0;
+    float vx = 0;
     if (actions.move_left && !actions.move_right) {
-        dx = -PLAYER_SPEED;
+        vx = -PLAYER_SPEED;
         p->facing_right = FALSE;
     }
     else if (!actions.move_left && actions.move_right) {
-        dx = PLAYER_SPEED;
+        vx = PLAYER_SPEED;
         p->facing_right = TRUE;
     }
     // Determine state and update
     PlayerMoveState state = Physics_DeterminePlayerState(&game->terrain, p);
     switch (state) {
         case GROUNDED:
-            Physics_UpdateGrounded(&game->terrain, p, dx, dt);
+            Physics_UpdateGrounded(&game->terrain, p, vx, dt);
             break;
         case FALLING:
-            Physics_UpdateFalling(&game->terrain, p, dx, dt);
+            Physics_UpdateFalling(&game->terrain, p, vx, dt);
             break;
         default:
             break;

@@ -5,6 +5,7 @@
 #include <SDL2/SDL_net.h>
 
 #include "../shared/core_types.h"
+#include "../shared/net_protocol.h"
 
 #define PLAYER_NUM_SPRITES 12
 #define PROJECTILE_NUM_SPRITES 8
@@ -66,10 +67,10 @@ typedef struct {
     TCPsocket server;
 } cl_char_t;
 
+#define MAX_SERVER_MESSAGES 10
 typedef struct {
     /* game logic */
     GameState *game;
-    int game_over;
     /* client wrappers */
     cl_player_t cl_players[NUM_PLAYERS];
     cl_char_t cl_char;
@@ -84,6 +85,7 @@ typedef struct {
     int my_player_id;
     TCPsocket server_socket;
     SDLNet_SocketSet server_socket_set;
+    struct { uint8_t pending; sv_msg_t content[MAX_SERVER_MESSAGES]; } msgs;
 } cl_state_t;
 
 #endif

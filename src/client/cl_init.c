@@ -84,7 +84,7 @@ void cl_init_Players(cl_state_t *client) {
     // Players
     cl_init_SpritesPlayers(client->cl_players);
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        cl_player_Init(&client->cl_players[i], client->cl_players[i].state, client->renderer);
+        cl_player_Init(&client->cl_players[i], &client->game->players[i], client->renderer);
     }
     cl_char_Init(&client->cl_char, &client->cl_players[client->my_player_id], client->server_socket);
 }
