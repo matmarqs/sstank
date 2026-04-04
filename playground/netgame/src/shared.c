@@ -15,6 +15,46 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define UNUSED(x) (void)(x)
 
+#define MAX_BUF 4096
+typedef struct {
+    uint8_t buffer[MAX_BUF];
+    int start;
+    int size;
+} ring_buffer_t;
+
+void ring_buffer_init(ring_buffer_t *rg) {
+    rg->start = 0;
+    rg->size = 0;
+}
+
+int ring_buffer_enqueue(ring_buffer_t *rg, uint8_t c) {
+    if (rg->size == MAX_BUF) {
+        // it's full
+        return 0;
+    }
+    rg->buffer[(rg->start + rg->size) % MAX_BUF] = c;
+    rg->size++;
+    return 1;
+}
+
+int ring_buffer_dequeue(ring_buffer_t *rg, uint8_t *c) {
+    if (rg->size == 0) {
+        // it's empty
+        return 0;
+    }
+    *c = rg->buffer[rg->start];
+    rg->start = (rg->start + 1) % MAX_BUF;
+    rg->size--;
+    return 1;
+}
+
+void ring_buffer_print_all(ring_buffer_t *rg) {
+    for (int i = 0; i < rg->size; i++) {
+        printf("%c ", rg->buffer[(rg->start + i) % MAX_BUF]);
+    }
+    printf("\n");
+}
+
 enum {
     PACKET_SV_WELCOME,
     PACKET_SV_FULL,
