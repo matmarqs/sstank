@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <SDL2/SDL_net.h>
 
+#include "queue.h"
+
 enum {
     PACKET_SV_WELCOME,
     PACKET_SV_FULL,
@@ -46,12 +48,15 @@ typedef struct {
     } data;
 } cl_msg_t;
 
+QUEUE_DECLARE(sv_msg_queue_t, sv_msg, cl_msg_t, 20);
+QUEUE_DECLARE(cl_msg_queue_t, cl_msg, sv_msg_t, 20);
+
 #define EACH_CLIENT_MAX_MESSAGES 10
 typedef struct {
     int id;
     int active;
     TCPsocket socket;
-    struct { uint8_t pending; cl_msg_t content; } msgs[EACH_CLIENT_MAX_MESSAGES];
+    sv_msg_queue_t queue;
 } sv_client_t;
 
 void net_SendPacketToClient(sv_client_t *client, uint8_t packet_id, void *data, int len_data);

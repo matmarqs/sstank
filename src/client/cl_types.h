@@ -85,7 +85,7 @@ typedef struct {
     int my_player_id;
     TCPsocket server_socket;
     SDLNet_SocketSet server_socket_set;
-    struct { uint8_t pending; sv_msg_t content[MAX_SERVER_MESSAGES]; } msgs;
+    cl_msg_queue_t queue;
 } cl_state_t;
 
 #endif

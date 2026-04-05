@@ -51,7 +51,7 @@ void cl_player_AnimationHandler(cl_player_t *cl_player, GameState *game) {
     }
 }
 
-void cl_player_Update(cl_player_t *cl_player, GameState *game, PlayerActions actions, float dt) {
+void cl_player_Update(cl_player_t *cl_player, GameState *game) {
     cl_player->damage_timer--;
     cl_player->damage_timer = MAX(cl_player->damage_timer, 0);
     if (cl_player->state->health <= 0) {

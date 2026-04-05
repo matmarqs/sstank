@@ -1,9 +1,6 @@
 #include "cl_net.h"
 
 #include "../shared/net_protocol.h"
-#include "cl_player.h"
-#include "cl_projectile.h"
-#include "cl_terrain.h"
 
 static cl_net_Handler handlers[256];
 
@@ -60,37 +57,8 @@ static int cl_net_H_PACKET_SV_MESSAGE(cl_state_t *client, void *data, int len_da
     if (len_data != packet_sizes[PACKET_SV_MESSAGE]) {
         return 0;
     }
-    GameState *game = client->game;
     sv_msg_t packet = *(sv_msg_t *)(data + 1);
-    uint8_t type = packet.type;
-    switch (type) {
-        case SVMSG_PLAYER_POS:
-            game->players[packet.data.player_pos.id].x = packet.data.player_pos.x;
-            game->players[packet.data.player_pos.id].y = packet.data.player_pos.y;
-            break;
-        case SVMSG_PLAYER_HEALTH:
-            cl_player_TakeDamage(&client->cl_players[packet.data.player_health.id],
-                                    packet.data.player_health.health);
-            break;
-        case SVMSG_PROJECTILE_NEW:
-            cl_projectile_Throw(&client->cl_projectile_sys, packet.data.projectile_new.type,
-                             packet.data.projectile_new.x, packet.data.projectile_new.y,
-                             packet.data.projectile_new.angle, packet.data.projectile_new.power,
-                             packet.data.projectile_new.owner_id);
-            break;
-        case SVMSG_TERRAIN_DESTROY:
-            cl_terrain_DestroyCircle(&client->cl_terrain,
-                                  packet.data.terrain_destroy.x, packet.data.terrain_destroy.y,
-                                  packet.data.terrain_destroy.radius);
-            client->cl_terrain.dirty = 1;
-            break;
-        case SVMSG_GAME_OVER:
-            Debug_Info("Game Over! Player %d wins!", packet.data.game_over.winner);
-            return 1;
-            break;
-        default:
-            break;
-    }
+    cl_msg_enqueue(&client->queue, packet);
     return 0;
 }
 

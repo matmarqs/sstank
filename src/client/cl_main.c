@@ -43,6 +43,45 @@ void cl__Init(cl_state_t *client, GameState *game, char *ip_addr) {
     cl_init_Projectiles(client);
 }
 
+int cl__ProcessMessages(cl_state_t *client) {
+    cl_msg_queue_t *queue = &client->queue;
+    GameState *game = client->game;
+    while (!cl_msg_is_empty(queue)) {
+        sv_msg_t msg;
+        cl_msg_dequeue(queue, &msg);
+        uint8_t type = msg.type;
+        switch (type) {
+            case SVMSG_PLAYER_POS:
+                game->players[msg.data.player_pos.id].x = msg.data.player_pos.x;
+                game->players[msg.data.player_pos.id].y = msg.data.player_pos.y;
+                break;
+            case SVMSG_PLAYER_HEALTH:
+                cl_player_TakeDamage(&client->cl_players[msg.data.player_health.id],
+                                        msg.data.player_health.health);
+                break;
+            case SVMSG_PROJECTILE_NEW:
+                cl_projectile_Throw(&client->cl_projectile_sys, msg.data.projectile_new.type,
+                                msg.data.projectile_new.x, msg.data.projectile_new.y,
+                                msg.data.projectile_new.angle, msg.data.projectile_new.power,
+                                msg.data.projectile_new.owner_id);
+                break;
+            case SVMSG_TERRAIN_DESTROY:
+                cl_terrain_DestroyCircle(&client->cl_terrain,
+                                    msg.data.terrain_destroy.x, msg.data.terrain_destroy.y,
+                                    msg.data.terrain_destroy.radius);
+                client->cl_terrain.dirty = 1;
+                break;
+            case SVMSG_GAME_OVER:
+                Debug_Info("Game Over! Player %d wins!", msg.data.game_over.winner);
+                return 1;
+                break;
+            default:
+                break;
+        }
+    }
+    return 0;
+}
+
 int cl__Update(cl_state_t *client) {
     GameState *game = client->game;
     game->time++;
@@ -57,12 +96,14 @@ int cl__Update(cl_state_t *client) {
     // (Server updates happen via cl_net_RecvFromServer)
     int quit_net = cl_net_RecvFromServer(client, 0);
 
+    quit_net = quit_net || cl__ProcessMessages(client);
+
     // Run projectile physics locally (for rendering)
     cl_projectile_Update(&client->cl_projectile_sys, client->game);
 
     // Update client-side rendering data
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        cl_player_Update(&client->cl_players[i], game, cl_input_GetActions(&client->cl_char.input), 1/60.0);
+        cl_player_Update(&client->cl_players[i], game);
     }
 
     return quit_local || quit_net;
