@@ -221,7 +221,6 @@ int sv_recv_client_data(sv_server_t *sv) {
                 }
             }
         }
-
         if (!clients[0].active || !clients[1].active) {
             sv_broadcast(sv, PACKET_SV_DISCONNECT, NULL, 0);
             printf("Some player disconnected. Ending game!\n");

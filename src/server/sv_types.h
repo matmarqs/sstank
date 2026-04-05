@@ -15,7 +15,6 @@ typedef struct {
     SDLNet_SocketSet socket_set;
     GameState game;  // Server maintains authoritative game state
     int game_running;
-    uint32_t last_tick;
 } sv_server_t;
 
 #endif

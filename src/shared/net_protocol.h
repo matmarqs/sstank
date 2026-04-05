@@ -5,6 +5,8 @@
 #include <SDL2/SDL_net.h>
 
 #include "queue.h"
+#define CL_MAX_MESSAGES 20
+#define SV_MAX_MESSAGES 20
 
 enum {
     PACKET_SV_WELCOME,
@@ -48,8 +50,8 @@ typedef struct {
     } data;
 } cl_msg_t;
 
-QUEUE_DECLARE(sv_msg_queue_t, sv_msg, cl_msg_t, 20);
-QUEUE_DECLARE(cl_msg_queue_t, cl_msg, sv_msg_t, 20);
+QUEUE_DECLARE(sv_msg_queue_t, sv_msg, cl_msg_t, SV_MAX_MESSAGES);
+QUEUE_DECLARE(cl_msg_queue_t, cl_msg, sv_msg_t, CL_MAX_MESSAGES);
 
 #define EACH_CLIENT_MAX_MESSAGES 10
 typedef struct {

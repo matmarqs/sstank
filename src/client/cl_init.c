@@ -18,6 +18,7 @@ void cl_init_Net(cl_state_t *client, char *ip_addr) {
         }
     }
     Debug_Info("Connected. Player ID: %d", client->my_player_id);
+    cl_msg_init(&client->queue);
 }
 
 void cl_init_Rendering(cl_state_t *client) {

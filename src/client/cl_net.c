@@ -81,7 +81,7 @@ int cl_net_RecvFromServer(cl_state_t *client, int timeout) {
         char buffer[4096];
         int num_bytes_received = SDLNet_TCP_Recv(client->server_socket, buffer, sizeof(buffer));
         if ((SDL_GetTicks() - last_time) > 1000) {
-            printf("num_bytes_received = %d\n", num_bytes_received);
+            Debug_HexDump(buffer, num_bytes_received, "num_bytes_received = %d\n", num_bytes_received);
             last_time = SDL_GetTicks();
         }
         int offset = 0;
@@ -121,7 +121,7 @@ void cl_net_InitSockets(cl_state_t *client, char *ip_addr) {
 }
 
 void cl_net_SendMovement(TCPsocket server, PlayerActions actions) {
-    cl_msg_t cl_msg;
+    cl_msg_t cl_msg = {0};
     cl_msg.type = CLMSG_MOVE;
     cl_msg.data.move.left = actions.move_left;
     cl_msg.data.move.right = actions.move_right;
@@ -129,7 +129,7 @@ void cl_net_SendMovement(TCPsocket server, PlayerActions actions) {
 }
 
 void cl_net_SendThrow(TCPsocket server, float angle, float power, int type) {
-    cl_msg_t cl_msg;
+    cl_msg_t cl_msg = {0};
     cl_msg.type = CLMSG_PROJECTILE;
     cl_msg.data.projectile.type = type;
     cl_msg.data.projectile.angle = angle;

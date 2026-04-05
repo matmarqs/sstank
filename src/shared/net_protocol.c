@@ -1,8 +1,8 @@
 #include "base.h"
 #include "net_protocol.h"
 
-QUEUE_IMPLEMENT(sv_msg_queue_t, sv_msg, cl_msg_t, 20);
-QUEUE_IMPLEMENT(cl_msg_queue_t, cl_msg, sv_msg_t, 20);
+QUEUE_IMPLEMENT(sv_msg_queue_t, sv_msg, cl_msg_t, SV_MAX_MESSAGES);
+QUEUE_IMPLEMENT(cl_msg_queue_t, cl_msg, sv_msg_t, CL_MAX_MESSAGES);
 
 static void net_SendPacket(TCPsocket socket_to_send, uint8_t packet_id, void *data, int len_data, char *debug_string) {
     char buffer[sizeof(uint8_t) + len_data];

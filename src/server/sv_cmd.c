@@ -21,7 +21,7 @@ int sv_cmd_PlayerShoot(sv_server_t *server, PlayerState *p, ProjectileSystem *ps
     if (0 <= id && id < MAX_PROJECTILES) {
         p->throw_cooldown = 30;  // 0.5 second cooldown at 60fps
         // Broadcast projectile to all clients
-        sv_msg_t sv_msg;
+        sv_msg_t sv_msg = {0};
         sv_msg.type = SVMSG_PROJECTILE_NEW;
         sv_msg.data.projectile_new.owner_id = p->id;
         sv_msg.data.projectile_new.x = start_x;
@@ -36,7 +36,7 @@ int sv_cmd_PlayerShoot(sv_server_t *server, PlayerState *p, ProjectileSystem *ps
 }
 
 void sv_cmd_PlayerTakeDamage(sv_server_t *server, int player_id, float health) {
-  sv_msg_t sv_msg;
+  sv_msg_t sv_msg = {0};
   sv_msg.type = SVMSG_PLAYER_HEALTH;
   sv_msg.data.player_health.id = player_id;
   sv_msg.data.player_health.health = health;
@@ -44,7 +44,7 @@ void sv_cmd_PlayerTakeDamage(sv_server_t *server, int player_id, float health) {
 }
 
 void sv_cmd_PlayerBroadcastPositions(sv_server_t *server) {
-  sv_msg_t sv_msg;
+  sv_msg_t sv_msg = {0};
   for (int i = 0; i < NUM_PLAYERS; i++) {
       PlayerState *p = &server->game.players[i];
       sv_msg.type = SVMSG_PLAYER_POS;
@@ -57,7 +57,7 @@ void sv_cmd_PlayerBroadcastPositions(sv_server_t *server) {
 
 void sv_cmd_TerrainDestroy(sv_server_t *server, float cx, float cy, float r) {
   // Broadcast terrain destruction to clients
-  sv_msg_t sv_msg;
+  sv_msg_t sv_msg = {0};
   sv_msg.type = SVMSG_TERRAIN_DESTROY;
   sv_msg.data.terrain_destroy.x = cx;
   sv_msg.data.terrain_destroy.y = cy;

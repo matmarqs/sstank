@@ -36,6 +36,7 @@ void sv_net_Init(sv_server_t *server) {
         server->clients[i].socket = 0;
         server->clients[i].id = i;
         server->clients[i].active = 0;
+        sv_msg_init(&server->clients[i].queue);
     }
 }
 
