@@ -21,6 +21,20 @@ void sv__ProcessMessages(sv_server_t *server) {
             cl_msg_t msg;
             sv_msg_dequeue(queue, &msg);
             uint8_t type = msg.type;
+            static int last_time;
+            static int n_times = 0;
+            int current_time = SDL_GetTicks();
+            if (current_time - last_time > 1000) {
+                Debug_Info("Processing message for client %d", i);
+                Debug_Info("msg_type = %s", type == CLMSG_MOVE ? "CLMSG_MOVE" : "CLMSG_PROJECTILE");
+                Debug_Info("left = %s", msg.data.move.left == 0 ? "FALSE" : "TRUE");
+                Debug_Info("right = %s", msg.data.move.right == 0 ? "FALSE" : "TRUE");
+                n_times++;
+                if (n_times >= 2) {
+                    last_time = current_time;
+                    n_times = 0;
+                }
+            }
             PlayerState *player = &server->game.players[i];
             PlayerActions actions;
             switch (type) {

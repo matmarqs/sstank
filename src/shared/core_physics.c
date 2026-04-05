@@ -4,7 +4,6 @@
 #include "core_terrain.h" // Terrain_IsSolid
 
 int Physics_CheckCollision(Terrain *terr, float x, float y, float w, float h) {
-    return 0;
     int min_x = MAX(0, (int)x);
     int max_x = MIN(terr->width - 1, (int)(x + w));
     int min_y = MAX(0, (int)y);
@@ -20,7 +19,6 @@ int Physics_CheckCollision(Terrain *terr, float x, float y, float w, float h) {
 }
 
 PlayerMoveState Physics_DeterminePlayerState(Terrain *terr, PlayerState *p) {
-    return GROUNDED;
     // Check both bottom corners for ground
     float feet_y = p->y + p->h;
     int left_ground = Terrain_IsSolid(terr, p->x, feet_y + 1);
@@ -30,7 +28,7 @@ PlayerMoveState Physics_DeterminePlayerState(Terrain *terr, PlayerState *p) {
 
 void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float vx, float dt) {
     // Try to move horizontally
-    float new_x = p->x + vx / 60.0 * dt;
+    float new_x = p->x + vx * dt;
     // Check if we can stand at new position
     if (!Physics_CheckCollision(terr, new_x, p->y, p->w, p->h)) {
         // Free space? Just move there
@@ -54,10 +52,10 @@ void Physics_UpdateGrounded(Terrain *terr, PlayerState *p, float vx, float dt) {
 
 void Physics_UpdateFalling(Terrain *terr, PlayerState *p, float vx, float dt) {
     // Apply gravity (max fall speed)
-    p->vy += GRAVITY / 60.0f;
+    p->vy += GRAVITY * dt;
 
     // Apply horizontal movement
-    p->vx = vx / 60.0f;
+    p->vx = vx;
     float new_x = p->x + p->vx * dt;
 
     if (p->vx != 0 && !Physics_CheckCollision(terr, new_x, p->y, p->w, p->h)) {
@@ -65,7 +63,7 @@ void Physics_UpdateFalling(Terrain *terr, PlayerState *p, float vx, float dt) {
     }
 
     // Apply vertical movement
-    float new_y = p->y + p->vy / 60.0f;
+    float new_y = p->y + p->vy * dt;
 
     // Check collision at new position
     if (Physics_CheckCollision(terr, p->x, new_y, p->w, p->h)) {

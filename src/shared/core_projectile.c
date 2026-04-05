@@ -55,9 +55,9 @@ void Projectile_Update(ProjectileSystem *ps, GameState *game) {
             continue;
         }
         // Physics update
-        p->x += p->vx / 60;
-        p->y += p->vy / 60;
-        p->vy += GRAVITY / 60;
+        p->x += p->vx / 60.0;
+        p->y += p->vy / 60.0;
+        p->vy += GRAVITY / 60.0;
         // Collision
         if (p->x < -p->w || p->x > game->w || p->y > game->h) {
             p->state = PROJECTILE_INACTIVE;
