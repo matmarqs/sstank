@@ -17,18 +17,18 @@ void net_SendPacketToClient(sv_client_t *client, uint8_t packet_id, void *data, 
             size_to_send = size_to_copy + offset;
         }
         SDLNet_TCP_Send(client->socket, buffer, size_to_send);
-        // debugging
-        static int last_time;
-        static int n_times = 0;
-        int current_time = SDL_GetTicks();
-        if (current_time - last_time > 1000) {
-            n_times++;
-            Debug_HexDump(buffer, size_to_send, "Send %d bytes to client %d", size_to_send, client->id);
-            if (n_times >= 2) {
-                last_time = current_time;
-                n_times = 0;
-            }
-        }
+        //// debugging
+        //static int last_time;
+        //static int n_times = 0;
+        //int current_time = SDL_GetTicks();
+        //if (current_time - last_time > 1000) {
+        //    n_times++;
+        //    Debug_HexDump(buffer, size_to_send, "Send %d bytes to client %d", size_to_send, client->id);
+        //    if (n_times >= 2) {
+        //        last_time = current_time;
+        //        n_times = 0;
+        //    }
+        //}
     }
 }
 
@@ -44,11 +44,11 @@ void net_SendPacketToServer(TCPsocket socket_to_send, uint8_t packet_id, void *d
         size_to_send = size_to_copy + offset;
     }
     SDLNet_TCP_Send(socket_to_send, buffer, size_to_send);
-    // debugging
-    static int last_time;
-    int current_time = SDL_GetTicks();
-    if (current_time - last_time > 1000) {
-        Debug_HexDump(buffer, size_to_send, "Sent %d bytes to server", size_to_send);
-        last_time = current_time;
-    }
+    //// debugging
+    //static int last_time;
+    //int current_time = SDL_GetTicks();
+    //if (current_time - last_time > 1000) {
+    //    Debug_HexDump(buffer, size_to_send, "Sent %d bytes to server", size_to_send);
+    //    last_time = current_time;
+    //}
 }

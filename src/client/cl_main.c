@@ -45,15 +45,14 @@ void cl__Init(cl_state_t *client, GameState *game, char *ip_addr) {
 
 int cl__ProcessMessages(cl_state_t *client) {
     cl_msg_queue_t *queue = &client->queue;
-    GameState *game = client->game;
     while (!cl_msg_is_empty(queue)) {
         sv_msg_t msg;
         cl_msg_dequeue(queue, &msg);
         uint8_t type = msg.type;
         switch (type) {
             case SVMSG_PLAYER_POS:
-                game->players[msg.data.player_pos.id].x = msg.data.player_pos.x;
-                game->players[msg.data.player_pos.id].y = msg.data.player_pos.y;
+              cl_player_MovementHandler(&client->cl_players[msg.data.player_pos.id],
+                                        msg.data.player_pos.x, msg.data.player_pos.y);
                 break;
             case SVMSG_PLAYER_HEALTH:
                 cl_player_TakeDamage(&client->cl_players[msg.data.player_health.id],
@@ -61,9 +60,9 @@ int cl__ProcessMessages(cl_state_t *client) {
                 break;
             case SVMSG_PROJECTILE_NEW:
                 cl_projectile_Throw(&client->cl_projectile_sys, msg.data.projectile_new.type,
-                                msg.data.projectile_new.x, msg.data.projectile_new.y,
-                                msg.data.projectile_new.angle, msg.data.projectile_new.power,
-                                msg.data.projectile_new.owner_id);
+                                    msg.data.projectile_new.x, msg.data.projectile_new.y,
+                                    msg.data.projectile_new.angle, msg.data.projectile_new.power,
+                                    msg.data.projectile_new.owner_id);
                 break;
             case SVMSG_TERRAIN_DESTROY:
                 cl_terrain_DestroyCircle(&client->cl_terrain,

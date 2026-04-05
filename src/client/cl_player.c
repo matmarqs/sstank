@@ -1,7 +1,7 @@
 #include <SDL2/SDL_image.h> // IMG_LoadTexture
 
 #include "cl_player.h"
-#include "../shared/core_player.h"
+#include "cl_types.h"
 
 static int loop_integer(int i, int n) {
     int period = 2 * (n - 1);  // For n=6, period = 10
@@ -41,6 +41,24 @@ void cl_player_TakeDamage(cl_player_t *cl_player, float new_health) {
     cl_player->damage_timer = 60;
 }
 
+void cl_player_MovementHandler(cl_player_t *cl_player, float x, float y) {
+    PlayerState *p = cl_player->state;
+    float x0 = p->x;
+    if (x > x0) {
+        p->facing_right = TRUE;
+        p->vx = PLAYER_SPEED;
+    }
+    else if (x < x0) {
+        p->facing_right = FALSE;
+        p->vx = -PLAYER_SPEED;
+    }
+    else {
+        p->vx = 0;
+    }
+    p->x = x;
+    p->y = y;
+}
+
 void cl_player_AnimationHandler(cl_player_t *cl_player, GameState *game) {
     // Animation
     int t = game->time;
@@ -58,7 +76,6 @@ void cl_player_Update(cl_player_t *cl_player, GameState *game) {
         cl_player->state->alive = 0;
     }
     if (cl_player->state->alive) {
-        //Player_MovementHandler(cl_player->state, game, actions, dt);
         cl_player_AnimationHandler(cl_player, game);
     }
 }

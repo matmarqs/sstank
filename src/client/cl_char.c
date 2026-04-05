@@ -136,11 +136,15 @@ void cl_char_ShootingHandler(cl_char_t *cl_char) {
     cl_char->projectile_timer--;
     if (cl_char->projectile_timer <= 0)
         cl_char->projectile_timer = 0;
+    cl_char->change_arm_timer--;
+    if (cl_char->change_arm_timer <= 0)
+        cl_char->change_arm_timer = 0;
     // change weapon timer
     if (!cl_char->change_arm_timer) {
         if (cl_char->input.change_arm) {
             cl_char->change_arm_timer = 15;
             cl_char->curr_arm = (cl_char->curr_arm + 1) % 2;
+            Debug_Info("Changed curr_arm = %d", cl_char->curr_arm);
         }
     }
     // shoot when hold button is released

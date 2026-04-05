@@ -53,7 +53,6 @@ typedef struct {
 QUEUE_DECLARE(sv_msg_queue_t, sv_msg, cl_msg_t, SV_MAX_MESSAGES);
 QUEUE_DECLARE(cl_msg_queue_t, cl_msg, sv_msg_t, CL_MAX_MESSAGES);
 
-#define EACH_CLIENT_MAX_MESSAGES 10
 typedef struct {
     int id;
     int active;

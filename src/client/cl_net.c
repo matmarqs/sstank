@@ -81,7 +81,7 @@ int cl_net_RecvFromServer(cl_state_t *client, int timeout) {
         char buffer[4096];
         int num_bytes_received = SDLNet_TCP_Recv(client->server_socket, buffer, sizeof(buffer));
         if ((SDL_GetTicks() - last_time) > 1000) {
-            Debug_HexDump(buffer, num_bytes_received, "num_bytes_received = %d\n", num_bytes_received);
+            //Debug_HexDump(buffer, num_bytes_received, "num_bytes_received = %d\n", num_bytes_received);
             last_time = SDL_GetTicks();
         }
         int offset = 0;
